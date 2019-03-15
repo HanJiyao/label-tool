@@ -1,1 +1,1 @@
-# label-tool
+This is a simple web tool to choose topics
