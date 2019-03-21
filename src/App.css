@@ -31,3 +31,23 @@
     transform: rotate(360deg);
   }
 }
+#customScroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  background-color: #fff;
+  visibility: hidden;
+} 
+#customScroll::-webkit-scrollbar:focus{
+  visibility: 1;
+}
+#customScroll::-webkit-scrollbar-thumb {
+  background-color: #bdbdbd;
+}
+@media only screen and (max-width: 600px) {
+  .card-content{
+    padding: 0!important
+  }
+  .card-action{
+    padding: 0!important
+  }
+}

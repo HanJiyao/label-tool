@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "csv": "^5.1.1",
     "papaparse": "^4.6.3",
     "react": "^16.8.4",
+    "react-addons-update": "^15.6.2",
+    "react-csv": "^1.1.1",
     "react-dom": "^16.8.4",
+    "react-filepond": "^7.0.1",
     "react-materialize": "^2.6.0",
     "react-scripts": "2.1.8",
-    "typescript": "^3.3.3333"
+    "react-select": "^2.4.2",
+    "typescript": "^3.3.3333",
+    "xlsx": "^0.14.1"
   },
   "scripts": {
     "start": "react-scripts start",
