@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "filepond": "^4.2.0",
     "papaparse": "^4.6.3",
     "react": "^16.8.4",
     "react-addons-update": "^15.6.2",
