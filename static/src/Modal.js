@@ -2,18 +2,18 @@ import React, { Component } from "react";
 import M from "materialize-css";
 
 class Modal extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+    };
+  }
   componentDidMount() {
     const options = {
       onOpenStart: () => {},
       onOpenEnd: () => {},
       onCloseStart: () => {},
       onCloseEnd: () => {},
-      inDuration: 250,
-      outDuration: 250,
-      opacity: 0.5,
       dismissible: true,
-      startingTop: "2%",
-      endingTop: "10%"
     };
     M.Modal.init(this.Modal, options);
   }
@@ -24,17 +24,48 @@ class Modal extends Component {
             data-target="dataModal"
             style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
             className='waves-effect waves-light btn-large orange modal-trigger'
-            onClick={this.props.filterData}>
+            onClick={this.props.filterData}
+            disabled={this.props.checkDisabled}>
             <i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">edit</i>check
         </button>
         <div
-          ref={Modal => {this.Modal = Modal}} id="dataModal" className=" container modal">
+          ref={Modal => {this.Modal = Modal}} id="dataModal" className="modal bottom-sheet modal-fixed-footer">
           <div className="modal-content">
-            <h6>Modal Header</h6>
-            <p>A bunch of text</p>
+            <table className="striped highlight responsive-table">
+              <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Topic</th>
+                    <th>Subject Area</th>
+                    <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.props.queryData.map((item,i)=>
+                  <tr key={i}>
+                    <td>
+                      <strong>{item.Title}</strong>
+                    </td>
+                    <td>
+                      {item.Description}
+                    </td>
+                    <td>
+                      <strong>{item.Topic}</strong>
+                    </td>
+                    <td>
+                      {item['Subject Area']}
+                    </td>
+                    <td>
+                      {item.Score}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-          <div className="modal-content">
-            <button className="modal-close waves-effect waves blue btn" 
+          <div className="modal-footer">
+            <button type="submit" className="modal-close waves-effect waves blue btn" 
               onClick = {this.props.outputHandler}>
               Add
             </button>

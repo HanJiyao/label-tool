@@ -1,7 +1,7 @@
 import  React, { Component } from 'react';
 import './App.css';
 import Select from 'react-select';
-import load from './load.gif';
+import load from './load.svg';
 import update from 'react-addons-update'; 
 import { CSVLink } from 'react-csv'
 import { FilePond, registerPlugin } from 'react-filepond';
@@ -10,7 +10,7 @@ import 'filepond/dist/filepond.min.css';
 import Modal from './Modal'
 registerPlugin();
 
-const fileName = ['all_items_Hersheys.csv','all_items_barclaysT2.csv']
+const fileName = ['all_items_barclaysT2.csv']
 var options = []
 var items = []
 const topicTxt = require('./data/topics_keywords_latest.json')
@@ -24,6 +24,8 @@ for (var key in ordered) {
     items.push({id:ordered[key].ui_text[0],label:ordered[key].ui_text[0]})
   }
 }
+options.unshift({value: "Cannot be determined", label: "Cannot be determined"})
+items.unshift({id: "Cannot be determined", label: "Cannot be determined"})
 const inlineStyle = {
   customStyles:{
     option: (provided, state) => ({
@@ -48,7 +50,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data:null,
+      loaded:false,
+      data:{},
+      displayData:{},
       queryData:[],
       topic: '',
       correct: false,
@@ -57,6 +61,7 @@ class App extends Component {
       filter:'',
       keyword:[],
       keywordJson:topicTxt,
+      checkDisabled:true
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -97,11 +102,14 @@ class App extends Component {
   loadNewItem(){
     this.setState({topic:(this.state.data[this.state.index].Manual===undefined)?"":this.state.data[this.state.index].Manual})
     this.setState({correct:(this.state.data[this.state.index].Correct===0)?false:((this.state.data[this.state.index].Correct===undefined)?false:true)})
+    this.setState({keyword:[]})
+    this.setState({checkDisabled:true})  
   }
-  updateData(result) {
+  async updateData(result) {
     const data = result.data;
-    this.setState({data: data}); 
-    this.loadNewItem();
+    await this.setState({data: data}); 
+    await this.loadNewItem();
+    this.setState({loaded: true})
   }
   async indexUp(){
     await this.writeData()
@@ -161,6 +169,7 @@ class App extends Component {
         case 39: document.getElementById("arrowUp").click();break;
         case 89: document.getElementById("yesBtn").click();break;
         case 78: document.getElementById("noBtn").click();break;
+        case 67: document.getElementById("checkBtn").click();break;
         case 13:if(!this.state.correct) this.selectRef.focus();break;
         default: break;
       }
@@ -179,16 +188,26 @@ class App extends Component {
     })
     queryKeyword = queryKeyword.map((item,i)=>{
       return item.word
-    }).join(" ")
+    }).join(" ").toLowerCase()
     this.setState({queryData:this.state.data.filter((item)=>{
-        return (item.Title.indexOf(queryKeyword)!==-1)
+        return (item.Title.toLowerCase().indexOf(queryKeyword)!==-1)
       })
     })
   }
   render() {
-    if((this.state.data!==null)&&(this.state.data!==undefined)){
-      const currentTopic = this.state.data[this.state.index].Topic.replace(/[["\]]/g, '')
-      const titleTextList = this.state.data[this.state.index].Title.replace(/[^A-Z0-9\s-]/ig, '').split(' ');
+    if(this.state.loaded){
+      let currentTopic=""
+      let titleTextList=[]
+      let description=""
+      try{
+        currentTopic = this.state.data[this.state.index].Topic.replace(/[["\]]/g, '');
+        titleTextList = this.state.data[this.state.index].Title.replace(/[^A-Za-z0-9\s-']/ig, '').split(' ');
+        description = this.state.data[this.state.index].Description
+      } catch{
+        currentTopic="Error: Invalid Data "
+        titleTextList=["Error: Invalid Data "]
+        description="Error: Invalid Data "
+      }
       const titleList = titleTextList.map((word, i)=>
         <span
           style={{cursor:"pointer"}}
@@ -203,7 +222,8 @@ class App extends Component {
                 this.setState(prevState => ({
                   keyword: prevState.keyword.filter(keyword => keyword.word !== word)
                 }));
-              }            
+              }  
+              this.setState({checkDisabled:false})          
           }}> {word} 
         </span>)
       return (
@@ -214,7 +234,7 @@ class App extends Component {
                 <button id="arrowDown" 
                   onClick={this.indexDown} 
                   disabled={this.state.index===0?'disabled' : null} 
-                  className=" btn-floating btn-large waves-effect waves-light blue">
+                  className=" btn-floating btn-large waves-effect waves-light orange">
                     <i style={inlineStyle.arrowTxtStyle} className="material-icons">keyboard_arrow_left</i>
                 </button>
               </div>
@@ -262,7 +282,7 @@ class App extends Component {
                     <button id="arrowDown" 
                       onClick={this.indexDown} 
                       disabled={this.state.index===0?'disabled' : null} 
-                      className=" btn-floating btn-large waves-effect waves-light blue">
+                      className=" btn-floating btn-large waves-effect waves-light orange">
                         <i style={inlineStyle.arrowTxtStyle} className="material-icons">keyboard_arrow_left</i>
                     </button>
                   </div>
@@ -270,7 +290,7 @@ class App extends Component {
                     {this.state.download?
                     <CSVLink 
                       data={this.state.data} 
-                      filename={fileName}
+                      filename="all_items.csv"
                       target="_blank">
                       <button style={inlineStyle.saveBtn} className="waves-effect waves-light btn-large orange darken-4" onClick={this.startDownload}><i className="material-icons left">save_alt</i>Confirm</button>
                     </CSVLink>
@@ -280,14 +300,14 @@ class App extends Component {
                     <button id="arrowUp" 
                       onClick={this.indexUp} 
                       disabled={this.state.index===this.state.data.length-1?'disabled' : null} 
-                      className="btn-floating btn-large waves-effect waves-light blue">
+                      className="btn-floating btn-large waves-effect waves-light orange">
                         <i style={inlineStyle.arrowTxtStyle} className=" material-icons">keyboard_arrow_right</i>
                     </button>
                   </div>
                 </div>
                 <div className="card-content row" style={inlineStyle.contentStyle}>
                   <h5 id="customScroll"  className="col s12" style={inlineStyle.titleStyle}>{titleList}</h5>
-                  <h6 id="customScroll" className="col s12" style={inlineStyle.descStyle}>{this.state.data[this.state.index].Description}</h6>
+                  <h6 id="customScroll" className="col s12" style={inlineStyle.descStyle}>{description}</h6>
                 </div>
                 <div className="card-action" style={inlineStyle.actStyle}>
                   {(this.state.correct)?
@@ -315,8 +335,10 @@ class App extends Component {
                       </div>
                       <div className="col s12 l6">
                         <Modal 
+                          checkDisabled ={this.state.checkDisabled}
                           outputHandler = {this.outputHandler}
                           filterData = {this.filterData}
+                          queryData = {this.state.queryData}
                         />
                       </div>
                     </div>
@@ -347,7 +369,7 @@ class App extends Component {
                 <button id="arrowUp" 
                   onClick={this.indexUp} 
                   disabled={this.state.index===this.state.data.length-1?'disabled' : null} 
-                  className="btn-floating btn-large waves-effect waves-light blue">
+                  className="btn-floating btn-large waves-effect waves-light orange">
                     <i style={inlineStyle.arrowTxtStyle} className=" material-icons">keyboard_arrow_right</i>
                 </button>
               </div>
@@ -360,7 +382,7 @@ class App extends Component {
             server="/api"
             onupdatefiles={(fileItems) => {
               this.setState({
-                  files: fileItems.map(fileItem => fileItem.file)
+                files: fileItems.map(fileItem => fileItem.file)
               });
             }}>
           </FilePond>
@@ -369,7 +391,7 @@ class App extends Component {
     } else {
       return (
         <div style={{width:'100vw',height:'100vh'}} className="valign-wrapper center-align">
-          <img style={{margin:"auto"}} src={load} alt="Loading..." height="100" width="100"/>
+          <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
         </div>
       )
     }

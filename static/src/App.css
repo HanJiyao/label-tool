@@ -52,6 +52,12 @@
 .selectTitle:hover {
   color:#ff9800
 }
+.modal.bottom-sheet{
+  max-height: 100%!important
+}
+.modal.modal-fixed-footer{
+  height: 100%!important;
+}
 @media only screen and (max-width: 1000px) {
   #checkBtn{
     margin-top:1.5rem
