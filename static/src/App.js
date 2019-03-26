@@ -7,11 +7,10 @@ import { CSVLink } from 'react-csv'
 import { FilePond, registerPlugin } from 'react-filepond';
 import ReactAutocomplete from 'react-autocomplete';
 import 'filepond/dist/filepond.min.css';
-import M from "materialize-css";
 import Modal from './Modal'
 registerPlugin();
 
-const fileName = 'all_items_C0014376286T1.csv'
+const fileName = ['all_items_Hersheys.csv','all_items_barclaysT2.csv']
 var options = []
 var items = []
 const topicTxt = require('./data/topics_keywords_latest.json')
@@ -32,31 +31,32 @@ const inlineStyle = {
   },
   divStyle : {textAlign:"center",padding:"0"},
   contentStyle:{textAlign:"left",margin:"0",paddingTop:".5rem"},
-  btnStyle:{width:"100%",height:'65px',borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"},
+  btnStyle:{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"},
   symbolStyle:{fontSize:"2rem",fontWeight:"900",margin:"0"},
   actStyle:{textAlign:"left",paddingTop:"0",},
   rowStyle:{paddingTop:"1.5rem",margin:"0",},
   arrowStyle:{color:"white"},
   arrowTxtStyle:{fontSize:"3rem",margin:"0"},
   hideStyle:{display:'none'},
-  loadingStyle:{height:'100vh',width:'100vw',position:'relative',},
-  loadImg:{position:'absolute',top: '42%',left: '48%',},
-  red:{color:"red"},saveBtn:{borderRadius:"100px",marginTop:".6rem",width:"100%",marginBottom:"1rem"},
-  selectStyle:{paddingTop:"2rem",margin:"0",height:"100px"},
-  mainRowStyle:{paddingTop:"1rem",width:"100%"},
-  descStyle:{height:"4rem",overflowY:"scroll"},
+  red:{color:"red"},saveBtn:{borderRadius:"100px",width:"100%",marginBottom:"1rem"},
+  selectStyle:{paddingTop:"2rem",margin:"0",height:"85px"},
+  mainRowStyle:{paddingTop:"1rem",width:"100%",margin:"0"},
+  descStyle:{height:"7.5rem",overflowY:"scroll"},
   titleStyle:{height:"4.2rem",overflowY:"scroll",fontSize:"1.8rem"}
 }
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      data:null,
+      queryData:[],
       topic: '',
-      correct: true,
+      correct: false,
       index: 0,
       download:false,
       filter:'',
       keyword:[],
+      keywordJson:topicTxt,
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -71,6 +71,8 @@ class App extends Component {
     this.writeData = this.writeData.bind(this);
     this.startDownload = this.startDownload.bind(this);
     this.selectRef=React.createRef();
+    this.outputHandler = this.outputHandler.bind(this);
+    this.filterData = this.filterData.bind(this)
   }
   setCorrect(){
     this.setState({correct:true});
@@ -93,8 +95,8 @@ class App extends Component {
     }
   }
   loadNewItem(){
-    this.setState({topic:this.state.data[this.state.index].Manual})
-    this.setState({correct:(this.state.data[this.state.index].Correct===0||this.state.data[this.state.index].Correct==="0")?false:true})
+    this.setState({topic:(this.state.data[this.state.index].Manual===undefined)?"":this.state.data[this.state.index].Manual})
+    this.setState({correct:(this.state.data[this.state.index].Correct===0)?false:((this.state.data[this.state.index].Correct===undefined)?false:true)})
   }
   updateData(result) {
     const data = result.data;
@@ -132,22 +134,21 @@ class App extends Component {
     })
   }
   componentDidMount() {
-    var csvFilePath = require("./data/"+fileName);
     var Papa = require("papaparse/papaparse.min.js");
-    Papa.parse(csvFilePath, {
-      header: true,
-      download: true,
-      skipEmptyLines: true,
-      complete: this.updateData
-    });
+    for (var i = 0; i < fileName.length; i++){
+      var csvFilePath = require("./data/"+fileName[i]);
+      Papa.parse(csvFilePath, {
+        header: true,
+        download: true,
+        skipEmptyLines: true,
+        complete: this.updateData
+      });
+    }
     document.addEventListener("keydown", this.keyFunction, false);
-    M.Modal.init(this.Modal);
   }
   componentWillUnmount(){
     document.removeEventListener("keydown", this.keyFunction, false);
-  }
-  handleInit() {
-  }
+  }  
   keyFunction(event) {
     var key = event.keyCode || event.charCode || 0;
     var target = event.target || event.srcElement;
@@ -165,24 +166,35 @@ class App extends Component {
       }
     }
   }
+  outputHandler(){
+    console.log("out")
+  }
+  filterData(){
+    var queryKeyword = this.state.keyword.sort((a,b)=>{
+      if (parseInt(b.key) > parseInt(a.key))
+        return -1;
+      if (parseInt(b.key) < parseInt(a.key))
+        return 1;
+      return 0;
+    })
+    queryKeyword = queryKeyword.map((item,i)=>{
+      return item.word
+    }).join(" ")
+    this.setState({queryData:this.state.data.filter((item)=>{
+        return (item.Title.indexOf(queryKeyword)!==-1)
+      })
+    })
+  }
   render() {
-    if(this.state.data!==undefined){
+    if((this.state.data!==null)&&(this.state.data!==undefined)){
       const currentTopic = this.state.data[this.state.index].Topic.replace(/[["\]]/g, '')
       const titleTextList = this.state.data[this.state.index].Title.replace(/[^A-Z0-9\s-]/ig, '').split(' ');
-      var prevKeyword = {}
       const titleList = titleTextList.map((word, i)=>
         <span
           style={{cursor:"pointer"}}
           key={i} 
-          className={(this.state.keyword.find(element=>element.word===word)!==undefined)?"orange-text":null}
+          className={(this.state.keyword.find(element=>element.word===word)!==undefined)?"selectTitle orange-text text-darken-4":"selectTitle"}
           onClick={()=>{
-            console.log(this.state.keyword.length===0)
-            if(this.state.length===0){
-              prevKeyword = {key:i,word:word}
-              this.setState({keyword:{key:i,word:word}},()=>{
-                console.log(prevKeyword)
-              })
-            } else {
               if(this.state.keyword.find(element=>element.word===word)===undefined){
                 this.setState(prevState => ({
                   keyword: [...prevState.keyword, {key:i,word:word}]
@@ -191,11 +203,9 @@ class App extends Component {
                 this.setState(prevState => ({
                   keyword: prevState.keyword.filter(keyword => keyword.word !== word)
                 }));
-              }
-            }
-            
-          }}
-        >{word} </span>)
+              }            
+          }}> {word} 
+        </span>)
       return (
         <div className="container">
           <div className="card valign-wrapper" style={inlineStyle.divStyle} >
@@ -210,14 +220,14 @@ class App extends Component {
               </div>
               <div className="col m8 s12" style={inlineStyle.mainRowStyle}>
                 <div className="card-content row" style={inlineStyle.contentStyle}>
-                  <div className="col s6 l3">
+                  <div className="col s4 m3">
                     <div className="input-field" style={inlineStyle.indexStyle}>
                       <i className="material-icons prefix">search</i>
                       <input type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
                       <label htmlFor="index" className="active">Index</label>
                     </div>
                   </div>
-                  <div className="col s6 l4">
+                  <div className="col s8 m4">
                     <div className="input-field" style={inlineStyle.indexStyle}>
                       <ReactAutocomplete
                         items={items}
@@ -232,7 +242,7 @@ class App extends Component {
                           position: 'fixed',
                           overflowX: 'hidden',
                           maxHeight: '15rem',
-                          width:'3rem',
+                          width:'5rem',
                           zIndex:"20000"}}
                         renderItem={(item, highlighted) =>
                           <div
@@ -248,7 +258,15 @@ class App extends Component {
                       <label className="active" htmlFor="filter">Filter</label>
                     </div>
                   </div>
-                  <div className="col s12 m6 l5 right">
+                  <div className="col s3 hide-on-med-and-up mobileNav mobileArrowLeft"  style={inlineStyle.arrowStyle}>
+                    <button id="arrowDown" 
+                      onClick={this.indexDown} 
+                      disabled={this.state.index===0?'disabled' : null} 
+                      className=" btn-floating btn-large waves-effect waves-light blue">
+                        <i style={inlineStyle.arrowTxtStyle} className="material-icons">keyboard_arrow_left</i>
+                    </button>
+                  </div>
+                  <div className="col s6 m5 mobileNav">
                     {this.state.download?
                     <CSVLink 
                       data={this.state.data} 
@@ -256,7 +274,15 @@ class App extends Component {
                       target="_blank">
                       <button style={inlineStyle.saveBtn} className="waves-effect waves-light btn-large orange darken-4" onClick={this.startDownload}><i className="material-icons left">save_alt</i>Confirm</button>
                     </CSVLink>
-                    :<button style={inlineStyle.saveBtn} className="waves-effect waves-light btn-large orange" onClick={this.startDownload}><i className="material-icons left">save</i>Download</button>}
+                    :<button style={inlineStyle.saveBtn} className="waves-effect waves-light btn-large orange" onClick={this.startDownload}><i className="material-icons left">save</i>save</button>}
+                  </div>
+                  <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={inlineStyle.arrowStyle}>
+                    <button id="arrowUp" 
+                      onClick={this.indexUp} 
+                      disabled={this.state.index===this.state.data.length-1?'disabled' : null} 
+                      className="btn-floating btn-large waves-effect waves-light blue">
+                        <i style={inlineStyle.arrowTxtStyle} className=" material-icons">keyboard_arrow_right</i>
+                    </button>
                   </div>
                 </div>
                 <div className="card-content row" style={inlineStyle.contentStyle}>
@@ -265,8 +291,8 @@ class App extends Component {
                 </div>
                 <div className="card-action" style={inlineStyle.actStyle}>
                   {(this.state.correct)?
-                    <div className="row" style={inlineStyle.selectStyle}>
-                      <h5 className="col s12" style={(currentTopic===""||currentTopic==="Cannot be determined")?inlineStyle.red:null}>
+                    <div className="row currentTopic valign-wrapper" style={inlineStyle.selectStyle}>
+                      <h5 className="col s12 center-align" style={(currentTopic===""||currentTopic==="Cannot be determined")?inlineStyle.red:null}>
                         <strong >{currentTopic===""?"Cannot be determined":currentTopic}</strong>
                       </h5>
                     </div>
@@ -288,7 +314,10 @@ class App extends Component {
                         />
                       </div>
                       <div className="col s12 l6">
-                        <Modal />
+                        <Modal 
+                          outputHandler = {this.outputHandler}
+                          filterData = {this.filterData}
+                        />
                       </div>
                     </div>
                   }
@@ -329,7 +358,6 @@ class App extends Component {
             allowMultiple={true}
             maxFiles={1}
             server="/api"
-            oninit={() => this.handleInit() }
             onupdatefiles={(fileItems) => {
               this.setState({
                   files: fileItems.map(fileItem => fileItem.file)
@@ -340,7 +368,9 @@ class App extends Component {
       );
     } else {
       return (
-        <div style={inlineStyle.loadingStyle}><img src={load} alt="Loading..." style={inlineStyle.loadImg} height="100" width="100"/></div>
+        <div style={{width:'100vw',height:'100vh'}} className="valign-wrapper center-align">
+          <img style={{margin:"auto"}} src={load} alt="Loading..." height="100" width="100"/>
+        </div>
       )
     }
   }

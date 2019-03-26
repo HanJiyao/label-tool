@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "filepond": "^4.3.3",
+    "filepond": "^4.3.4",
+    "fs": "0.0.1-security",
     "html-react-parser": "^0.6.3",
     "jquery": "^3.3.1",
     "materialize-css": "^1.0.0",

@@ -41,18 +41,57 @@
   background-color: #bdbdbd;
 }
 .react-select__input,.react-select__single-value{
-  font-size: 20px;
+  font-size: 16px;
 }
-@media only screen and (max-width: 600px) {
+.react-select__input{
+  height: 40px;
+}
+.selectTitle {
+  transition: color 0.3s
+}
+.selectTitle:hover {
+  color:#ff9800
+}
+@media only screen and (max-width: 1000px) {
+  #checkBtn{
+    margin-top:1.5rem
+  }
+  .currentTopic{
+    height: 157px!important;
+  }
+}
+@media only screen and (max-width: 800px) {
   .card-content{
     padding: 0!important
   }
   .card-action{
     padding: 0!important
   }
+  .valign-wraper,.col.m8.s12{
+    padding-top: 0!important
+  }
+  .mobileNav{
+    padding: 0!important;
+  }
 }
-@media only screen and (max-width: 1000px) {
-  #checkBtn{
-    margin-top:1.5rem
+@media only screen and (max-width: 600px) {
+  .mobileNav button{
+    border-radius: 0!important;
+    width: 100%!important;
+    height: 56px;
+  }
+  .mobileArrowLeft{
+    padding-left: 0.75rem!important;
+  }
+  .mobileArrowLeft button{
+    border-bottom-left-radius: 100px!important;
+    border-top-left-radius: 100px!important;
+  }
+  .mobileArrowRight{
+    padding-right: 0.75rem!important;
+  }
+  .mobileArrowRight button{
+    border-bottom-right-radius: 100px!important;
+    border-top-right-radius: 100px!important;
   }
 }

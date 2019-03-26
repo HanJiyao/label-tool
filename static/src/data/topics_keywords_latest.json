@@ -173,7 +173,11 @@
             "retail sales"
         ],
         "keywords": [
-            "retail sales"
+            "retail sales",
+            "Cashier Training",
+            "Cashier Basics Training",
+            "Computer Assisted Ordering",
+            "cao"
         ],
         "stopwords": [],
         "original_key": "retail sales"
@@ -312,7 +316,8 @@
             "computer graphics"
         ],
         "keywords": [
-            "computer graphics"
+            "computer graphics",
+            "autodesk inventor"
         ],
         "stopwords": [],
         "original_key": "computer graphics"
@@ -336,7 +341,12 @@
             "machine learning"
         ],
         "keywords": [
-            "machine learning"
+            "machine learning",
+            "reinforcement learning",
+            "deep learning",
+            "Hidden Markov",
+            "Dimensionality reduction",
+            "supervised learning"
         ],
         "stopwords": [],
         "original_key": "machine learning"
@@ -350,12 +360,6 @@
             "sql server"
         ],
         "keywords": [
-            "sql server 2012",
-            "ms sql server",
-            "sql server 2005",
-            "microsoft sql server",
-            "sql server 2008 r2",
-            "sql server 2000",
             "sql server"
         ],
         "stopwords": [],
@@ -636,30 +640,6 @@
         "stopwords": [],
         "original_key": "contract management"
     },
-    "collaboration tools": {
-        "keywords_desc": [],
-        "le_mapped_count": 1353,
-        "old_topics_keys": [
-            "google,tools and technology,"
-        ],
-        "old_topics": [
-            "google"
-        ],
-        "ui_text": [
-            "collaboration tools"
-        ],
-        "keywords": [
-            "Collaboration Tools",
-            "webex",
-            "Jabber",
-            "confluence",
-            "google docs",
-            "google sheets",
-            "Evernote"
-        ],
-        "stopwords": [],
-        "original_key": "collaboration tools"
-    },
     "credit risk": {
         "keywords_desc": [],
         "le_mapped_count": 744,
@@ -735,8 +715,7 @@
             "natural language processing"
         ],
         "keywords": [
-            "Natural Language Processing",
-            "NLP"
+            "Natural Language Processing"
         ],
         "stopwords": [],
         "original_key": "natural language processing"
@@ -1199,7 +1178,9 @@
             "photoshop"
         ],
         "keywords": [
-            "photoshop"
+            "photoshop",
+            "bert monroy",
+            "graphic design"
         ],
         "stopwords": [],
         "original_key": "photoshop"
@@ -1278,7 +1259,9 @@
         ],
         "keywords": [
             "ethics",
-            "Corporate Responsibility"
+            "code of conduct",
+            "Corporate Responsibility",
+            "Gifts and Gratuities"
         ],
         "stopwords": [],
         "original_key": "ethics"
@@ -1568,11 +1551,17 @@
         ],
         "keywords": [
             "electrical equipment",
-            "Plant Engineer",
-            "Plant Engineers",
-            "Plant Engineering",
-            "Improvement Engineer",
-            "Reliability Engineering"
+            "power engineering",
+            "application engineering",
+            "control system",
+            "mechanical engineering",
+            "water engineering",
+            "electrical engineering",
+            "engineering",
+            "robotics",
+            "system engineering",
+            "mining engineering",
+            "energy engineering"
         ],
         "stopwords": [],
         "original_key": "engineering"
@@ -2394,7 +2383,9 @@
             "legislation",
             "law",
             "competition law",
-            "legal"
+            "legal",
+            "Antitrust",
+            "Anti trust"
         ],
         "stopwords": [],
         "original_key": "legal"
@@ -2669,7 +2660,8 @@
             "interviewing",
             "interviewing skills",
             "recruitment",
-            "recruiting"
+            "recruiting",
+            "hiring"
         ],
         "stopwords": [],
         "original_key": "recruiting"
@@ -2835,7 +2827,9 @@
             "resource management"
         ],
         "keywords": [
-            "resource management"
+            "resource management",
+            "assigning resources",
+            "resource assignment"
         ],
         "stopwords": [],
         "original_key": "resource management"
@@ -3345,8 +3339,7 @@
             "in-memory database"
         ],
         "keywords": [
-            "SAP HANA",
-            "in-memory database"
+
         ],
         "stopwords": [],
         "original_key": "in-memory database"
@@ -3405,7 +3398,11 @@
             "music"
         ],
         "keywords": [
-            "music"
+            "music",
+            "acoustic guitar",
+            "piano",
+            "banjo",
+            "singing lessons"
         ],
         "stopwords": [],
         "original_key": "music"
@@ -3575,6 +3572,7 @@
         ],
         "keywords": [
             "beverage",
+            "Ground Beef",
             "food and beverage"
         ],
         "stopwords": [],
@@ -3627,7 +3625,6 @@
             "social sciences"
         ],
         "keywords": [
-            "social sciences",
             "social sciences"
         ],
         "stopwords": [],
@@ -3643,8 +3640,7 @@
         ],
         "keywords": [
             "iot",
-            "internet of things",
-            "internet of things (iot)"
+            "internet of things"
         ],
         "stopwords": [],
         "original_key": "internet of things (iot)"
@@ -3951,6 +3947,7 @@
             "osha",
             "health & safety",
             "hygiene",
+            "Immunizations",
             "health and safety"
         ],
         "stopwords": [],
@@ -3974,7 +3971,8 @@
             "negotiation skills",
             "negotiating",
             "negotiations",
-            "negotiation"
+            "negotiation",
+            "Negotiate"
         ],
         "stopwords": [],
         "original_key": "negotiation"
@@ -4675,6 +4673,8 @@
             "system administration",
             "system analysis",
             "web design",
+            "Google Documents",
+            "Google Docs",
             "application development"
         ],
         "stopwords": [],
@@ -6931,6 +6931,7 @@
             "managing people",
             "assertiveness",
             "facilitation skills",
+            "yoga",
             "building relationships",
             "conflict resolution",
             "interpersonal skills",
@@ -7149,7 +7150,8 @@
             "Behavioral Finance",
             "Assets and Liabilities",
             "interest rate",
-            "finance"
+            "finance",
+            "Financial Modelling"
         ],
         "stopwords": [],
         "original_key": "finance"
@@ -7269,6 +7271,7 @@
             "regulation",
             "regulatory compliance",
             "GDPR",
+            "FINRA",
             "regulatory"
         ],
         "stopwords": [],
@@ -7843,7 +7846,9 @@
             "calligraphy",
             "sculpture",
             "painting",
-            "Performing arts"
+            "Performing arts",
+            "vector graphics",
+            "logo design"
         ],
         "stopwords": [],
         "original_key": "art"
@@ -8141,6 +8146,7 @@
             "manager training",
             "management training",
             "management skills",
+            "Manager's Performance Guide",
             "management"
         ],
         "stopwords": [],
@@ -8381,7 +8387,6 @@
             "adobe after effects"
         ],
         "keywords": [
-            "after effects",
             "adobe after effects"
         ],
         "stopwords": [],
@@ -8468,7 +8473,8 @@
             "Word-of-mouth",
             "Word of mouth",
             "Market Research",
-            "lead generation"
+            "lead generation",
+            "marketing essentials"
         ],
         "stopwords": [],
         "original_key": "sales & marketing"
@@ -8848,7 +8854,11 @@
             "team leaders",
             "leading teams",
             "influencing others",
-            "leadership"
+            "leadership",
+            "Mentoring",
+            "Coaching Teams",
+            "Empowering Employees",
+            "reverse delegation"
         ],
         "stopwords": [],
         "original_key": "leadership"
@@ -8931,6 +8941,7 @@
             "hazardous waste",
             "hazardous",
             "safety",
+            "txo reliability summit",
             "Emergency Operations Center"
         ],
         "stopwords": [],
@@ -8994,7 +9005,8 @@
             "Heavy Vehicles",
             "Fork Lift",
             "ForkLift",
-            "Lift Truck"
+            "Lift Truck",
+            "high lift"
         ],
         "stopwords": [],
         "original_key": "heavy vehicles"
@@ -9372,34 +9384,6 @@
         "stopwords": [],
         "original_key": "dreamweaver"
     },
-    "presentation,None": {
-        "keywords_desc": [],
-        "le_mapped_count": 7050,
-        "old_topics_keys": [
-            "presentation,None",
-            "presentation design,presentation,",
-            "presentation skill,presentation,",
-            "presentation development,presentation,"
-        ],
-        "old_topics": [
-            "presentation",
-            "presentation design",
-            "presentation skill",
-            "presentation development"
-        ],
-        "ui_text": [
-            "presentation"
-        ],
-        "keywords": [
-            "effective presentation skills",
-            "presentation development",
-            "body language",
-            "Managing nervousness",
-            "facial expressions"
-        ],
-        "stopwords": [],
-        "original_key": "presentation"
-    },
     "adobe captivate": {
         "keywords_desc": [],
         "le_mapped_count": 160,
@@ -9440,7 +9424,10 @@
             "performance reviews",
             "performance assessment",
             "performance appraisal",
-            "performance management"
+            "performance management",
+            "Goal Setting",
+            "Performance Mgmt",
+            "Setting Goals"
         ],
         "stopwords": [],
         "original_key": "performance management"
@@ -9484,7 +9471,10 @@
         "keywords": [
             "healthcare",
             "Blood Pressure",
-            "Cholesterol"
+            "Cholesterol",
+            "Pharmacy",
+            "Pathogens",
+            "Epidemic"
         ],
         "stopwords": [],
         "original_key": "healthcare"
@@ -9781,7 +9771,10 @@
             "final cut pro",
             "gopro",
             "film making",
-            "Premiere Pro"
+            "Premiere Pro",
+            "dslr video tips",
+            "visual effects",
+            "time-lapse video"
         ],
         "stopwords": [],
         "original_key": "film making"
@@ -9828,6 +9821,8 @@
         ],
         "keywords": [
             "database administration",
+            "database architecture",
+            "database security",
             "database management"
         ],
         "stopwords": [],
@@ -9870,7 +9865,8 @@
             "sap netweaver"
         ],
         "keywords": [
-            "sap netweaver"
+            "sap netweaver",
+            "netweaver"
         ],
         "stopwords": [],
         "original_key": "sap netweaver"
@@ -9931,7 +9927,6 @@
             "Platform as a Service",
             "Software as a Service",
             "AWS",
-            "GCP",
             "Pivotal",
             "Amazon Web Services",
             "SAP Cloud Platform",
@@ -10176,7 +10171,11 @@
             "team building"
         ],
         "keywords": [
-            "team building"
+            "team building",
+            "Making Teams Work",
+            "Team Dynamics",
+            "team culture",
+            "team communication"
         ],
         "stopwords": [],
         "original_key": "team building"
