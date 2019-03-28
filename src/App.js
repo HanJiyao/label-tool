@@ -10,7 +10,7 @@ import Modal from './Modal'
 import MSelect from './Select'
 registerPlugin();
 
-const fileName = ['all_items_mondelezT1.csv']
+const fileName = ['all_items_Hersheys.csv']
 var options = []
 var items = []
 
@@ -58,7 +58,6 @@ class App extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.setCorrect = this.setCorrect.bind(this);
     this.setFalse = this.setFalse.bind(this);
-    this.initData = this.initData.bind(this);
     this.indexSearch = this.indexSearch.bind(this);
     this.indexDown = this.indexDown.bind(this);
     this.indexUp = this.indexUp.bind(this);
@@ -96,39 +95,7 @@ class App extends Component {
     this.setState({keyword:[]})
     this.setState({checkDisabled:true})  
   }
-  async initData(result) {
-    const data = result.data;
-    await this.setState({data: data}); 
-    const topicTxt = require('./data/topics_keywords_latest.json')
-    await this.setState({keywordJson:topicTxt})
-    const ordered = {};
-    Object.keys(topicTxt).sort().forEach(function(key) {
-      ordered[key] = topicTxt[key];
-    })
-    for (var key in ordered) {
-      if (ordered.hasOwnProperty(key)) {
-        options.push({value: ordered[key].ui_text, label: ordered[key].ui_text});
-        items.push({id:ordered[key].ui_text[0],label:ordered[key].ui_text[0]})
-      }
-    }
-    items.unshift({id: "Cannot be determined", label: "Cannot be determined"}) 
-    await this.setState({keywordsArr:Object.values(this.state.keywordJson).map((val)=>val.keywords).flat(1)})
-    let filtered = this.state.data.filter((val)=>{
-      let diff = []
-      this.state.keywordsArr.forEach((key)=>{
-        if(val.Title.toLowerCase().includes(key.toLowerCase()))
-        diff.push(val)
-      })
-      return diff[0]
-    })
-    let uniqueResult = this.state.data.filter(function(obj) {
-      return !filtered.some(function(obj2) {
-          return (obj.Title===obj2.Title&&obj.Description===obj2.Description&&obj.Score===obj2.Score&&obj.Topic===obj2.Topic);
-      });
-    });
-    await this.setState({displayedData:uniqueResult})    
-    this.setState({loaded: true})
-  }
+  
   async indexUp(){
     await this.writeData()
     if(this.state.index<this.state.displayedData.length-1){
@@ -208,7 +175,39 @@ class App extends Component {
         header: true,
         download: true,
         skipEmptyLines: true,
-        complete: this.initData
+        complete:  async (result)=> {
+          const data = result.data
+          await this.setState({data: data}); 
+          const topicTxt = require('./data/topics_keywords_latest.json')
+          await this.setState({keywordJson:topicTxt})
+          const ordered = {};
+          Object.keys(topicTxt).sort().forEach(function(key) {
+            ordered[key] = topicTxt[key];
+          })
+          for (var key in ordered) {
+            if (ordered.hasOwnProperty(key)) {
+              options.push({value: ordered[key].ui_text, label: ordered[key].ui_text});
+              items.push({id:ordered[key].ui_text[0],label:ordered[key].ui_text[0]})
+            }
+          }
+          items.unshift({id: "Cannot be determined", label: "Cannot be determined"}) 
+          await this.setState({keywordsArr:Object.values(this.state.keywordJson).map((val)=>val.keywords).flat(1)})
+          let filtered = this.state.data.filter((val)=>{
+            let diff = []
+            this.state.keywordsArr.forEach((key)=>{
+              if(val.Title.toLowerCase().includes(key.toLowerCase()))
+              diff.push(val)
+            })
+            return diff[0]
+          })
+          let uniqueResult = this.state.data.filter(function(obj) {
+            return !filtered.some(function(obj2) {
+                return (obj.Title===obj2.Title&&obj.Description===obj2.Description&&obj.Score===obj2.Score&&obj.Topic===obj2.Topic);
+            });
+          });
+          await this.setState({displayedData:uniqueResult});
+          await this.setState({loaded:true})
+        },
       });
     }
     document.addEventListener("keydown", this.keyFunction, false);
