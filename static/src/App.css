@@ -19,7 +19,9 @@
 .App-link {
   color: #61dafb;
 }
-
+.container{
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+}
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -47,7 +49,11 @@
   height: 40px;
 }
 .selectTitle {
-  transition: color 0.3s
+  transition: color 0.3s;
+  cursor:pointer
+}
+.selectTitle.active{
+  font-weight: 500
 }
 .selectTitle:hover {
   color:#ff9800
@@ -76,15 +82,15 @@
   .valign-wraper,.col.m8.s12{
     padding-top: 0!important
   }
-  .mobileNav{
-    padding: 0!important;
-  }
 }
 @media only screen and (max-width: 600px) {
   .mobileNav button{
     border-radius: 0!important;
     width: 100%!important;
     height: 56px;
+  }
+  .mobileNav{
+    padding: 0!important;
   }
   .mobileArrowLeft{
     padding-left: 0.75rem!important;

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "filepond": "^4.3.4",
+    "filepond": "^4.3.5",
     "fs": "0.0.1-security",
     "html-react-parser": "^0.6.3",
     "jquery": "^3.3.1",
@@ -15,7 +15,7 @@
     "react-csv": "^1.1.1",
     "react-dom": "^16.8.5",
     "react-filepond": "^7.0.1",
-    "react-scripts": "2.1.8",
+    "react-scripts": "^2.1.8",
     "react-select": "^2.4.2",
     "typescript": "^3.3.4000",
     "xlsx": "^0.14.1"

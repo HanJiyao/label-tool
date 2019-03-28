@@ -31,7 +31,7 @@ class Modal extends Component {
         <div
           ref={Modal => {this.Modal = Modal}} id="dataModal" className="modal bottom-sheet modal-fixed-footer">
           <div className="modal-content">
-            <table className="striped highlight responsive-table">
+            <table className="striped highlight">
               <thead>
                 <tr>
                     <th>Title</th>
@@ -65,8 +65,11 @@ class Modal extends Component {
             </table>
           </div>
           <div className="modal-footer">
+            <button className="btn-flat" style={{textTransform:"none",fontSize:"1.35rem"}}>
+              <strong>{this.props.newKeyword} <i className="material-icons" style={{verticalAlign:"-0.2rem"}}>keyboard_arrow_right</i> {this.props.topic}</strong>
+            </button>
             <button type="submit" className="modal-close waves-effect waves blue btn" 
-              onClick = {this.props.outputHandler}>
+              onClick = {this.props.jsonUpdate}>
               Add
             </button>
             <button className="modal-close waves-effect waves-grey btn-flat">
