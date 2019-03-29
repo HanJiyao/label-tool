@@ -112,16 +112,18 @@
         "stopwords": [],
         "original_key": "derivatives"
     },
-    "incident reporting": {
+    "incident management": {
         "keywords_desc": [],
         "le_mapped_count": 196,
         "old_topics_keys": [],
         "old_topics": [],
         "ui_text": [
-            "incident reporting"
+            "incident management"
         ],
         "keywords": [
-            "incident reporting"
+            "incident reporting",
+            "Incident Investigation",
+            "Accident investigation"
         ],
         "stopwords": [],
         "original_key": "incident reporting"
@@ -316,8 +318,7 @@
             "computer graphics"
         ],
         "keywords": [
-            "computer graphics",
-            "autodesk inventor"
+            "computer graphics"
         ],
         "stopwords": [],
         "original_key": "computer graphics"
@@ -375,7 +376,9 @@
         ],
         "keywords": [
             "sourcing",
-            "purchasing"
+            "purchasing",
+            "Purchase Order",
+            "Purchase Requisition"
         ],
         "stopwords": [],
         "original_key": "purchasing"
@@ -471,6 +474,7 @@
             "Batch Production",
             "Process Control",
             "Flow Production",
+            "Material Handling",
             "Job Production",
             "ISA-88",
             "ISA-95",
@@ -487,7 +491,8 @@
             "DCS",
             "Distributed Control Systems",
             "Zero Defects",
-            "manufacturing"
+            "manufacturing",
+            "Flex & Kiss Moulding"
         ],
         "stopwords": [],
         "original_key": "manufacturing"
@@ -558,11 +563,13 @@
             "safety training",
             "fire fighting",
             "safety meeting",
+            "Substance Abuse",
             "personal protective equipment",
             "fire protection",
             "firefighting",
             "dangerous goods",
             "hazardous materials",
+            "Fire Prevention",
             "fall protection",
             "personal safety",
             "electrical safety",
@@ -805,6 +812,7 @@
             "defensive driving",
             "driving license",
             "safety driving",
+            "safe driving",
             "driving skills"
         ],
         "stopwords": [],
@@ -918,6 +926,7 @@
             "Social CRM",
             "Marketing Spend Management",
             "Marketing Performance",
+            "customer success",
             "customer relationship management"
         ],
         "stopwords": [],
@@ -1180,7 +1189,8 @@
         "keywords": [
             "photoshop",
             "bert monroy",
-            "graphic design"
+            "graphic design",
+            "Mobile Marketing"
         ],
         "stopwords": [],
         "original_key": "photoshop"
@@ -1259,9 +1269,11 @@
         ],
         "keywords": [
             "ethics",
+            "Conflicts of Interest",
             "code of conduct",
             "Corporate Responsibility",
-            "Gifts and Gratuities"
+            "Gifts and Gratuities",
+            "Ethically"
         ],
         "stopwords": [],
         "original_key": "ethics"
@@ -1491,7 +1503,12 @@
             "intellectual property"
         ],
         "keywords": [
-            "intellectual property"
+            "intellectual property",
+            "patents",
+            "patent",
+            "copyright",
+            "copyrighting",
+            "trademark"
         ],
         "stopwords": [],
         "original_key": "intellectual property"
@@ -1743,7 +1760,8 @@
             "loans"
         ],
         "keywords": [
-            "loans"
+            "loans",
+            "loan"
         ],
         "stopwords": [],
         "original_key": "loans"
@@ -2134,7 +2152,8 @@
         "keywords": [
             "oracle 10g",
             "oracle application server",
-            "oracle"
+            "oracle",
+            "Oracle8i"
         ],
         "stopwords": [],
         "original_key": "oracle"
@@ -2260,7 +2279,9 @@
         ],
         "keywords": [
             "regression",
-            "statistics"
+            "statistics",
+            "Percentiles",
+            "Confidence Intervals"
         ],
         "stopwords": [],
         "original_key": "statistics"
@@ -2537,6 +2558,7 @@
             "identity management"
         ],
         "keywords": [
+            "Password Verification",
             "Identity Federation",
             "Identity Theft",
             "User Access",
@@ -2553,6 +2575,7 @@
             "Entity Authentication Assurance",
             "Identity Proofing",
             "Identity Verification",
+            "Password Reset",
             "Privacy Framework",
             "Privacy Architecture",
             "Privacy Impact",
@@ -2661,7 +2684,8 @@
             "interviewing skills",
             "recruitment",
             "recruiting",
-            "hiring"
+            "hiring",
+            "Interview Practice"
         ],
         "stopwords": [],
         "original_key": "recruiting"
@@ -2896,7 +2920,8 @@
         ],
         "keywords": [
             "linux+",
-            "linux"
+            "linux",
+            "ubuntu"
         ],
         "stopwords": [],
         "original_key": "linux"
@@ -3050,7 +3075,9 @@
             "Retirement Planning",
             "Pension Plan",
             "Estate Planning",
-            "Personal Finance"
+            "Personal Finance",
+            "Personal Loan",
+            "financial wellness"
         ],
         "stopwords": [],
         "original_key": "personal finance"
@@ -3083,7 +3110,9 @@
             "data visualization"
         ],
         "keywords": [
-            "data visualization"
+            "data visualization",
+            "Pareto Charts",
+            "Pareto Chart"
         ],
         "stopwords": [],
         "original_key": "data visualization"
@@ -3299,7 +3328,6 @@
             "tax credit",
             "tax accounting",
             "tax",
-            "taxation",
             "income tax",
             "tax saving",
             "tax management",
@@ -3310,8 +3338,11 @@
         ],
         "keywords": [
             "PAYE",
+            "taxation",
             "FICA",
-            "tax"
+            "tax",
+            "Common Reporting Standard",
+            "CRS"
         ],
         "stopwords": [],
         "original_key": "tax"
@@ -3402,6 +3433,8 @@
             "acoustic guitar",
             "piano",
             "banjo",
+            "guitar",
+            "Musicians",
             "singing lessons"
         ],
         "stopwords": [],
@@ -3445,6 +3478,7 @@
             "project planning",
             "project manager",
             "project managers",
+            "PMP",
             "project management"
         ],
         "stopwords": [],
@@ -3573,7 +3607,18 @@
         "keywords": [
             "beverage",
             "Ground Beef",
-            "food and beverage"
+            "cheese",
+            "cheeses",
+            "meat",
+            "meats",
+            "Dairy",
+            "Peanut Butter",
+            "food and beverage",
+            "Chocolate",
+            "sweets",
+            "Confection",
+            "Brain Food",
+            "Allergy Friendly Menu"
         ],
         "stopwords": [],
         "original_key": "food and beverage"
@@ -3605,7 +3650,8 @@
             "grammar",
             "writing skills",
             "report writing",
-            "writing"
+            "writing",
+            "Write Quickly"
         ],
         "stopwords": [],
         "original_key": "writing"
@@ -3732,7 +3778,9 @@
             "production planning"
         ],
         "keywords": [
-            "production planning"
+            "production planning",
+            "Capacity Planning",
+            "Capacity Management"
         ],
         "stopwords": [],
         "original_key": "production planning"
@@ -3804,7 +3852,9 @@
             "html5"
         ],
         "keywords": [
-            "html5"
+            "html5",
+            "HTML",
+            "DHTML"
         ],
         "stopwords": [],
         "original_key": "html5"
@@ -3868,10 +3918,12 @@
         "keywords": [
             "customer relations",
             "customer relationship",
+            "customer relationships",
             "customer satisfaction",
             "customer retention",
             "SAP Hybris",
             "SAP Brand Impact",
+            "Support Center",
             "customer experience"
         ],
         "stopwords": [],
@@ -4100,7 +4152,6 @@
         "keywords": [
             "money laundering",
             "laundering",
-            "aml",
             "anti-money laundering",
             "financial crime"
         ],
@@ -4164,7 +4215,13 @@
             "intangible assets",
             "trade accounts",
             "net income",
-            "financial accounting"
+            "Income Training",
+            "Income Verification",
+            "asset protection",
+            "financial accounting",
+            "Costs Standard",
+            "Standard Costs",
+            "Standard Cost"
         ],
         "stopwords": [],
         "original_key": "financial accounting"
@@ -4278,6 +4335,7 @@
         "keywords": [
             "ui",
             "typography",
+            "Typographic",
             "SAP Fiori",
             "user interface"
         ],
@@ -4514,7 +4572,8 @@
             "emotional intelligence"
         ],
         "keywords": [
-            "emotional intelligence"
+            "emotional intelligence",
+            "Emotional Skills"
         ],
         "stopwords": [],
         "original_key": "emotional intelligence"
@@ -4549,12 +4608,16 @@
             "guest service",
             "customer care",
             "customer services",
+            "Tough Customers",
+            "Customer Needs",
             "customer journey",
             "customer interaction",
             "complaint handling",
             "guest relations",
             "guest services",
-            "customer service"
+            "customer service",
+            "Debit Card Servicing",
+            "Telephone Queries"
         ],
         "stopwords": [],
         "original_key": "customer service"
@@ -4664,17 +4727,22 @@
             "information technology"
         ],
         "keywords": [
-            "cybersecurity",
             "network security",
             "data management",
             "embedded systems",
             "it entrepreneurship",
             "software development",
+            "Internet Explorer",
             "system administration",
             "system analysis",
             "web design",
+            "OneDrive",
             "Google Documents",
             "Google Docs",
+            "Google Drive",
+            "Google Maps",
+            "Drupal",
+            "Information Technology",
             "application development"
         ],
         "stopwords": [],
@@ -4764,6 +4832,11 @@
             "Sales & Marketing"
         ],
         "keywords": [
+            "Marketing Foundations",
+            "Sales and marketing",
+            "Sales & Marketing",
+            "Consultative Selling",
+            "Relationship Marketing"
         ],
         "stopwords": [],
         "original_key": "Sales & Marketing"
@@ -4900,6 +4973,10 @@
         "keywords": [
             "employee induction",
             "employee onboarding",
+            "New Hire Orientation",
+            "New Hire",
+            "New Role",
+            "New Hires",
             "New Employee Orientation"
         ],
         "stopwords": [],
@@ -5150,7 +5227,8 @@
             "banking services",
             "bankers",
             "debt collection",
-            "banking"
+            "banking",
+            "Cheque Clearing"
         ],
         "stopwords": [],
         "original_key": "banking"
@@ -5556,7 +5634,8 @@
         "keywords": [
             "selling skills",
             "sales",
-            "lead generation"
+            "lead generation",
+            "Salesman"
         ],
         "stopwords": [],
         "original_key": "sales"
@@ -5582,6 +5661,8 @@
             "teenage health",
             "nutrition science",
             "fitness",
+            "Wellbeing",
+            "Science of Sleep",
             "health management"
         ],
         "ui_text": [
@@ -5592,7 +5673,8 @@
             "fitness",
             "health and fitness",
             "Blood Pressure",
-            "Cholesterol"
+            "Cholesterol",
+            "yoga"
         ],
         "stopwords": [],
         "original_key": "health and fitness"
@@ -5634,7 +5716,11 @@
             "learning management"
         ],
         "keywords": [
-            "learning management"
+            "learning management",
+            "Instructional Design",
+            "Teach Online",
+            "automated tutoring system",
+            "educational technology"
         ],
         "stopwords": [],
         "original_key": "learning management"
@@ -5709,16 +5795,18 @@
         "stopwords": [],
         "original_key": "structural engineering"
     },
-    "3ds max": {
+    "3d modeling": {
         "keywords_desc": [],
         "le_mapped_count": 915,
         "old_topics_keys": [],
         "old_topics": [],
         "ui_text": [
-            "3ds max"
+            "3d modeling"
         ],
         "keywords": [
-            "3ds max"
+            "3ds max",
+            "autodesk inventor",
+            "AutoCad"
         ],
         "stopwords": [],
         "original_key": "3ds max"
@@ -5733,7 +5821,8 @@
         ],
         "keywords": [
             "itil",
-            "information technology infrastructure library (itil)"
+            "information technology infrastructure library (itil)",
+            "ITIL®"
         ],
         "stopwords": [],
         "original_key": "information technology infrastructure library (itil)"
@@ -5869,6 +5958,8 @@
             "cybersecurity"
         ],
         "keywords": [
+            "Forensic Analysis",
+            "Forensics & Analysis",
             "cryptography",
             "digital security",
             "data security",
@@ -5881,7 +5972,11 @@
             "information security",
             "social engineering",
             "cism",
-            "cybersecurity"
+            "cybersecurity",
+            "Client-side attacks",
+            "Client-side attack",
+            "Server-side attacks",
+            "Server-side attack"
         ],
         "stopwords": [],
         "original_key": "cybersecurity"
@@ -5965,7 +6060,8 @@
         ],
         "keywords": [
             "managing change",
-            "change management"
+            "change management",
+            "Change Process"
         ],
         "stopwords": [],
         "original_key": "change management"
@@ -6060,6 +6156,7 @@
         ],
         "keywords": [
             "web development",
+            "FrontPage",
             "web applications"
         ],
         "stopwords": [],
@@ -6420,7 +6517,8 @@
             "creative thinking",
             "creativity",
             "innovative",
-            "creativity and innovation"
+            "creativity and innovation",
+            "Creative Strategies"
         ],
         "stopwords": [],
         "original_key": "creativity and innovation"
@@ -6488,7 +6586,8 @@
         "keywords": [
             "mergers",
             "acquisitions",
-            "mergers and acquisitions"
+            "mergers and acquisitions",
+            "Divestitures"
         ],
         "stopwords": [],
         "original_key": "mergers and acquisitions"
@@ -6738,6 +6837,7 @@
             "human resource management"
         ],
         "keywords": [
+            "Exit interview",
             "employee engagement",
             "human resource manager",
             "human capital",
@@ -6756,7 +6856,10 @@
             "Employee Management",
             "SuccessFactors HCM Cloud Software",
             "Employee Benefits",
-            "Digital HR suite"
+            "Digital HR suite",
+            "Payroll",
+            "Digital Portfolios",
+            "Work-Life Balance"
         ],
         "stopwords": [],
         "original_key": "human resource management"
@@ -6924,17 +7027,22 @@
             "soft skills"
         ],
         "keywords": [
+            "Personality Types",
+            "Personality Type",
             "mbti",
+            "Staying Positive",
+            "Building Trust",
             "myers briggs type indicator",
             "people management",
             "delegation strategies",
             "managing people",
             "assertiveness",
             "facilitation skills",
-            "yoga",
             "building relationships",
             "conflict resolution",
             "interpersonal skills",
+            "Meetings with Competitors",
+            "Meeting with Competitors",
             "Challenging Conversations",
             "people skills",
             "teamwork",
@@ -6952,7 +7060,14 @@
             "empathy",
             "difficult people",
             "coaching skills",
-            "soft skills"
+            "Effective Relationships",
+            "soft skills",
+            "Unconscious Bias",
+            "Presentation skills",
+            "Presentation Design",
+            "Presentations",
+            "Body language",
+            "Manage Conflict"
         ],
         "stopwords": [],
         "original_key": "soft skills"
@@ -7016,7 +7131,8 @@
             "harassment"
         ],
         "keywords": [
-            "harassment"
+            "harassment",
+            "Anti-Harassment"
         ],
         "stopwords": [],
         "original_key": "harassment"
@@ -7272,6 +7388,7 @@
             "regulatory compliance",
             "GDPR",
             "FINRA",
+            "Market Conduct",
             "regulatory"
         ],
         "stopwords": [],
@@ -7348,6 +7465,7 @@
             "it security"
         ],
         "keywords": [
+            "Confidential Info",
             "Security, Privacy and Data Protection",
             "Data Protection",
             "Data Privacy",
@@ -7614,7 +7732,8 @@
             "critical thinking"
         ],
         "keywords": [
-            "critical thinking"
+            "critical thinking",
+            "Thinking Critically"
         ],
         "stopwords": [],
         "original_key": "critical thinking"
@@ -7637,7 +7756,9 @@
         ],
         "keywords": [
             "seo",
-            "digital marketing"
+            "digital marketing",
+            "marketing emails",
+            "adwords"
         ],
         "stopwords": [],
         "original_key": "digital marketing"
@@ -7839,7 +7960,7 @@
             "freelance artist"
         ],
         "ui_text": [
-            "arts"
+            "art and design"
         ],
         "keywords": [
             "visual arts",
@@ -7848,7 +7969,8 @@
             "painting",
             "Performing arts",
             "vector graphics",
-            "logo design"
+            "logo design",
+            "Printmaking"
         ],
         "stopwords": [],
         "original_key": "art"
@@ -8067,7 +8189,13 @@
             "computer science"
         ],
         "keywords": [
-            "computer science"
+            "computer science",
+            "algorithms",
+            "computer communication",
+            "grid computing",
+            "data structures",
+            "embedded software",
+            "embedded hardware"
         ],
         "stopwords": [],
         "original_key": "computer science"
@@ -8085,7 +8213,8 @@
             "financial reporting"
         ],
         "keywords": [
-            "financial reporting"
+            "financial reporting",
+            "Transaction Reporting"
         ],
         "stopwords": [],
         "original_key": "financial reporting"
@@ -8147,7 +8276,9 @@
             "management training",
             "management skills",
             "Manager's Performance Guide",
-            "management"
+            "management",
+            "Being a Director",
+            "Mentoring Techniques"
         ],
         "stopwords": [],
         "original_key": "management"
@@ -8239,8 +8370,10 @@
             "brainstorming",
             "prospect theory",
             "optimism bias",
+            "Tough Decisions",
             "reference class forecasting",
             "sunk-cost fallacy",
+            "making decisions",
             "decision making"
         ],
         "stopwords": [],
@@ -8264,7 +8397,10 @@
             "SAP Analytics Cloud",
             "SAP Digital Boardroom",
             "Decision support systems",
-            "analytics"
+            "analytics",
+            "Fishbone Diagrams",
+            "Fishbone Diagram",
+            "Minitab"
         ],
         "stopwords": [],
         "original_key": "analytics"
@@ -8466,6 +8602,8 @@
             "marketing strategy",
             "customer relationship management",
             "CRM",
+            "Marketing Materials",
+            "Marketing Material",
             "Marketing Spend Management",
             "Marketing Performance",
             "Marketing Campaigns",
@@ -8474,6 +8612,7 @@
             "Word of mouth",
             "Market Research",
             "lead generation",
+            "Lead Development",
             "marketing essentials"
         ],
         "stopwords": [],
@@ -8535,7 +8674,8 @@
         "keywords": [
             "telephony",
             "telecom",
-            "telecommunications"
+            "telecommunications",
+            "eCommunications"
         ],
         "stopwords": [],
         "original_key": "telecommunications"
@@ -8608,7 +8748,12 @@
             "food safety"
         ],
         "keywords": [
-            "food safety"
+            "food safety",
+            "Food Allergen",
+            "PCQI",
+            "HACCP",
+            "Hazard analysis and critical control points",
+            "Preventive Controls Qualified Individual"
         ],
         "stopwords": [],
         "original_key": "food safety"
@@ -8856,9 +9001,13 @@
             "influencing others",
             "leadership",
             "Mentoring",
+            "Maintaining Motivation",
             "Coaching Teams",
             "Empowering Employees",
-            "reverse delegation"
+            "reverse delegation",
+            "Cross-functional Teams",
+            "Organizational Learning",
+            "Delegation"
         ],
         "stopwords": [],
         "original_key": "leadership"
@@ -9006,7 +9155,8 @@
             "Fork Lift",
             "ForkLift",
             "Lift Truck",
-            "high lift"
+            "high lift",
+            "vehicle recovery"
         ],
         "stopwords": [],
         "original_key": "heavy vehicles"
@@ -9087,7 +9237,8 @@
             "service center"
         ],
         "keywords": [
-            "service center"
+            "service center",
+            "Service Excellence"
         ],
         "stopwords": [],
         "original_key": "service center"
@@ -9267,7 +9418,8 @@
         ],
         "keywords": [
             "linguistics",
-            "linguistics"
+            "linguistics",
+            "Parts of Speech"
         ],
         "stopwords": [],
         "original_key": "linguistics"
@@ -9292,8 +9444,10 @@
             "data mining",
             "data modeling",
             "data analysis",
+            "data analytics",
             "Pivot Table",
-            "Pivot Tables"
+            "Pivot Tables",
+            "ANOVA"
         ],
         "stopwords": [],
         "original_key": "data analysis"
@@ -9427,7 +9581,10 @@
             "performance management",
             "Goal Setting",
             "Performance Mgmt",
-            "Setting Goals"
+            "Burnout",
+            "Performance Development",
+            "Setting Goals",
+            "Assessing Performance"
         ],
         "stopwords": [],
         "original_key": "performance management"
@@ -9473,6 +9630,8 @@
             "Blood Pressure",
             "Cholesterol",
             "Pharmacy",
+            "HITECH",
+            "HIPAA",
             "Pathogens",
             "Epidemic"
         ],
@@ -9511,7 +9670,8 @@
             "Services Procurement",
             "External Workforce Management",
             "Contingent workforce",
-            "workforce management"
+            "workforce management",
+            "diversity"
         ],
         "stopwords": [],
         "original_key": "workforce management"
@@ -9548,7 +9708,8 @@
         ],
         "keywords": [
             "scrum",
-            "agile"
+            "agile",
+            "Kanban"
         ],
         "stopwords": [],
         "original_key": "agile"
@@ -9648,7 +9809,8 @@
             "web design"
         ],
         "keywords": [
-            "web design"
+            "web design",
+            "Designing Websites"
         ],
         "stopwords": [],
         "original_key": "web design"
@@ -9738,7 +9900,9 @@
             "life insurance"
         ],
         "keywords": [
-            "life insurance"
+            "life insurance",
+            "Life and Critical Illness",
+            "Health Insurance Portability and Accountability Act"
         ],
         "stopwords": [],
         "original_key": "life insurance"
@@ -9770,9 +9934,13 @@
             "movie maker",
             "final cut pro",
             "gopro",
+            "vfx",
+            "video lighting",
+            "Video Production",
             "film making",
             "Premiere Pro",
             "dslr video tips",
+            "cinematography",
             "visual effects",
             "time-lapse video"
         ],
@@ -9933,7 +10101,8 @@
             "Google Cloud Platform",
             "Microsoft Azure",
             "cloud computing",
-            "RabbitMQ"
+            "RabbitMQ",
+            "Cloud Infrastructure"
         ],
         "stopwords": [],
         "original_key": "cloud computing"
@@ -10069,6 +10238,7 @@
             "financial management"
         ],
         "keywords": [
+            "Wealth Planning",
             "Corporate Life Cycle",
             "Value Maximization",
             "Capital Allocation",
@@ -10175,7 +10345,11 @@
             "Making Teams Work",
             "Team Dynamics",
             "team culture",
-            "team communication"
+            "Corporate Culture",
+            "team communication",
+            "Respect in the Workplace",
+            "cross cultural",
+            "Diversity"
         ],
         "stopwords": [],
         "original_key": "team building"
@@ -10195,7 +10369,8 @@
             "information management"
         ],
         "keywords": [
-            "information management"
+            "information management",
+            "Info Mgmt"
         ],
         "stopwords": [],
         "original_key": "information management"
@@ -10272,7 +10447,9 @@
             "assertive",
             "communicating",
             "communicate",
-            "communications"
+            "communications",
+            "English Course",
+            "language training"
         ],
         "stopwords": [],
         "original_key": "communications"
@@ -10427,5 +10604,33 @@
         ],
         "stopwords": [],
         "original_key": "corporate banking"
+    },
+    "hardware and equipment": {
+        "keywords_desc": [],
+        "le_mapped_count": 748,
+        "old_topics_keys": [],
+        "old_topics": [],
+        "ui_text": [
+            "hardware and equipment"
+        ],
+        "keywords": [
+            "hardware and equipment",
+            "Centrifugal",
+            "Magnets",
+            "Mould Washing",
+            "Electro Magnets",
+            "ElectroMagnets",
+            "Tub Washing",
+            "Monitoring Moulds",
+            "Moulding Line",
+            "Flex and Kiss",
+            "Roller Former",
+            "Shaft Seals",
+            "Block Melter",
+            "Wiring Schematics",
+            "Conveyors"
+        ],
+        "stopwords": [],
+        "original_key": "hardware and equipment"
     }
 }

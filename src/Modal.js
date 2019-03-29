@@ -70,7 +70,9 @@ class Modal extends Component {
             </button>
             <button type="submit" className="modal-close waves-effect waves blue btn" 
               onClick = {this.props.jsonUpdate}>
-              Add
+              <i class="material-icons">
+                add_circle_outline
+              </i> Add
             </button>
             <button className="modal-close waves-effect waves-grey btn-flat">
               Cancel
