@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const Papa = require('papaparse')
 const fs = require('fs');
 
-
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,61 +16,89 @@ app.get('/', (req,res) =>{
 
 app.get('/api/initData', (req,res) => {
     const topicJson = require('./data/topics_keywords_latest.json')
+    const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
     const fileName=['all_items_barclaysT2.csv']
     var options=[]
     var items=[]
-    var data = []
-    var displayedData = []
-    for (var i = 0; i < fileName.length; i++){
-        var csvFilePath = fs.readFileSync("./data/"+fileName[i], "utf8"); 
-        Papa.parse(csvFilePath, {
-            header: true,
-            skipEmptyLines: true,
-            complete: initData
-        })
-    }
-    function initData(results){
-        data.push(results);
-        if (data.length === fileName.length){
-            const data = results.data
-            const ordered = {};
-            Object.keys(topicJson).sort().forEach(function(key) {
-            ordered[key] = topicJson[key];
-            })
-            for (var key in ordered) {
-                if (ordered.hasOwnProperty(key)) {
-                    options.push({value: ordered[key].ui_text, label: ordered[key].ui_text});
-                    items.push({id:ordered[key].ui_text[0],label:ordered[key].ui_text[0]})
-                }
-            }
-            items.unshift({id: "Cannot be determined", label: "Cannot be determined"}) 
-            var keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
-            let filtered = data.filter((val)=>{
-                let diff = []
-                keywordsArr.forEach((key)=>{
-                    if(val.Title.toLowerCase().includes(key.toLowerCase()))
-                    diff.push(val)
-                })
-                return diff[0]
-            })
-            displayedData = data.filter(function(obj) {
-                return !filtered.some(function(obj2) {
-                    return (obj.Title===obj2.Title&&obj.Description===obj2.Description);
-                });
-            })
-            fs.writeFile('./data/database.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+    const ordered = {};
+    Object.keys(topicJson).sort().forEach(function(key) {
+        ordered[key] = topicJson[key];
+    })
+    for (var key in ordered) {
+        if (ordered.hasOwnProperty(key)) {
+            options.push({value: key, label: ordered[key].ui_text[0]});
+            items.push({id:key[0], label:ordered[key].ui_text[0]})
         }
     }
+    items.unshift({id: "", label: "Cannot be determined"}) 
+    var data = []
+    var displayedData = []
+    try {
+        require('./data/all_items_Merged.json')
+        displayedData = require('./data/all_items_Merged.json')
+    } catch {
+        for (var i = 0; i < fileName.length; i++){
+            var csvFilePath = fs.readFileSync("./data/"+fileName[i], "utf8"); 
+            Papa.parse(csvFilePath, {
+                header: true,
+                skipEmptyLines: true,
+                complete: initData
+            })
+        }
+        function initData(results){
+            data.push(results);
+            if ((data.length === fileName.length)){
+                const data = results.data
+                let filtered = data.filter((val)=>{
+                    let diff = []
+                    keywordsArr.forEach((key)=>{
+                        if(val.Title.toLowerCase().includes(key.toLowerCase()))
+                        diff.push(val)
+                    })
+                    return diff[0]
+                })
+                displayedData = data.filter(function(obj) {
+                    return !filtered.some(function(obj2) {
+                        return (obj.Title===obj2.Title&&obj.Description===obj2.Description);
+                    });
+                })
+                fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+            } 
+        }
+    } 
     res.json({
-        data:displayedData,
+        dataLength:displayedData.length,
         options:options,
         items:items,
         keywordsJson:topicJson
     });
 });
 
+app.post('/api/loadNewItem', function(req, res) {
+    const data = require('./data/all_items_Merged.json')
+    const index = req.body.index
+    res.json({
+        dataLength: data.length,
+        title: data[index].Title,
+        description: data[index].Description,
+        topicPrev: data[index].Topic,
+        topic: data[index].TopicModified===undefined?"":data[index].TopicModified,
+        correct: data[index].Correct===0?false:(data[index].Correct===undefined?false:true)
+    })
+    console.log("load")
+}); 
+
+app.post('/api/updateItem', function(req, res) {
+    let data = require('./data/all_items_Merged.json')
+    const index = req.body.index
+    data[index].Correct = req.body.correct
+    data[index].TopicModified = req.body.topicModified
+    fs.writeFile('./data/all_items_Merged.json', JSON.stringify(data) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+    res.json()
+}); 
+
 app.post('/api/filterData', function(req, res) {
-    const data = require('./data/database.json')
+    const data = require('./data/all_items_Merged.json')
     let queryKeyword = req.body.keywords.sort((a,b)=>{
         if (parseInt(b.key) > parseInt(a.key))
             return -1;
@@ -92,7 +119,7 @@ app.post('/api/filterData', function(req, res) {
 }); 
 
 app.post('/api/updateData', function(req, res) {
-    const data = require('./data/database.json')
+    const data = require('./data/all_items_Merged.json')
     let topicJson = require('./data/topics_keywords_latest.json')
     let keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
     const newKeyword = req.body.newKeyword
@@ -111,15 +138,17 @@ app.post('/api/updateData', function(req, res) {
         });
     })
     topicJson[req.body.topic].keywords.push(newKeyword)
-    fs.writeFile('./data/database.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
-    fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)});
-    res.json({
-        newData:displayedData
-    })
+    async function writeToFile(){
+        await fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        await fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        console.log("finish")
+    }
+    writeToFile()
+    res.json({updateDone:true})
 }); 
 
 const port = process.env.PORT || 3000;
 
 app.listen(port);
 
-console.log('Label tool activated on port :' + port);
+console.log("Label App Listening at port: "+port)

@@ -26,7 +26,7 @@ class Modal extends Component {
             className='waves-effect waves-light btn-large orange modal-trigger'
             onClick={this.props.filterData}
             disabled={this.props.checkDisabled}>
-            <i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">edit</i>check
+            <i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">find_in_page</i>check
         </button>
         <div
           ref={Modal => {this.Modal = Modal}} id="dataModal" className="modal bottom-sheet modal-fixed-footer">
@@ -70,8 +70,8 @@ class Modal extends Component {
             </button>
             <button type="submit" className="modal-close waves-effect waves blue btn" 
               onClick = {this.props.jsonUpdate}>
-              <i class="material-icons">
-                add_circle_outline
+              <i style={{margin:"0"}} class="material-icons right">
+                add
               </i> Add
             </button>
             <button className="modal-close waves-effect waves-grey btn-flat">
