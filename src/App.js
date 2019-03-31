@@ -3,6 +3,7 @@ import load from './load.svg';
 import './App.css';
 import Modal from './Modal'
 import MSelect from './Select'
+import Editor from './Editor'
 import Select from 'react-select';
 import axios from 'axios';
 import { FilePond, registerPlugin } from 'react-filepond';
@@ -33,7 +34,8 @@ class App extends Component {
       items:[],
       options:[],
       selectedOption:null,
-      updateDone:true
+      updateDone:true,
+      arrowDisabled:false,
     };
     this.handleTopicChange = this.handleTopicChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -48,7 +50,7 @@ class App extends Component {
     this.startDownload = this.startDownload.bind(this);
     this.selectRef=React.createRef();
     this.jsonUpdate = this.jsonUpdate.bind(this);
-    this.filterData = this.filterData.bind(this)
+    this.filterData = this.filterData.bind(this);
   }
   setCorrect(){
     this.setState({correct:true});
@@ -71,7 +73,7 @@ class App extends Component {
     }
   }
   loadNewItem(){
-    axios.post('/api/loadNewItem',{index:this.state.index})
+    axios.get('/api/loadNewItem/'+this.state.index)
     .then(res=>{
       let topic = res.data.topic
       this.setState({dataLength:res.data.dataLength})
@@ -84,7 +86,11 @@ class App extends Component {
       this.setState({correct:res.data.correct})
       this.setState({keyword:[]})
       this.setState({checkDisabled:true}) 
-      this.forceUpdate()
+      let arrowTrigger=null;
+      clearTimeout(arrowTrigger);
+      arrowTrigger = setTimeout(()=>{
+            this.setState({arrowDisabled:false})
+        },200);
     })
     .catch(err=>console.log(err))
   }
@@ -100,15 +106,18 @@ class App extends Component {
     .catch(err=>console.log(err))
   }
   async indexUp(){
+    await this.setState({arrowDisabled:true},()=>this.forceUpdate())
     await this.updateItem()
     if(this.state.index<this.state.dataLength-1){
-      this.setState({index: this.state.index+1},()=>{this.loadNewItem()});
+      await this.setState({index: this.state.index+1},()=>{this.loadNewItem()});
+      
     }
   }
   async indexDown(){
+    await this.setState({arrowDisabled:true},()=>this.forceUpdate())
     await this.updateItem()
     if(this.state.index>=0){
-      this.setState({index: this.state.index-1},()=>{this.loadNewItem();}); 
+      await this.setState({index: this.state.index-1},()=>{this.loadNewItem();}); 
     }
   }
   handleTopicChange = (selectedOption) => {
@@ -131,18 +140,29 @@ class App extends Component {
       .catch(err=>console.log(err))
   }
   async jsonUpdate(){
-    await this.setState({updateDone:false})
-    await this.setState({title:'Loading...'})
-    await this.setState({description:'Please be patient'})
+    this.setState({updateDone:false})
+    this.setState({title:'Loading...'})
+    this.setState({description:'Please be patient'})
     await axios.post('/api/updateData',{
+      index:this.state.index,
       topic:this.state.topicValue,
       newKeyword:this.state.newKeyword
     }).then(async res=>{
+      this.setState({title:res.data.title})
+      this.setState({description:res.data.description})
+      let topic = res.data.topic
+      this.setState({dataLength:res.data.dataLength})
+      this.setState({topicPrev:res.data.topicPrev})
+      this.setState({topic:topic})
+      this.setState({selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic)})
+      this.setState({topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value})
+      this.setState({correct:res.data.correct})
+      this.setState({keyword:[]})
+      this.setState({checkDisabled:true}) 
+      await this.setState({keywordsJson:res.data.keywordsJson})
       this.setState({updateDone:res.data.updateDone})
     })
     .catch(err=>console.log(err))
-    await this.loadNewItem()
-    await this.forceUpdate()
   }
   getData = () => {
     fetch('/api/initData')
@@ -152,6 +172,7 @@ class App extends Component {
       this.setState({items:result.items})
       this.setState({options:result.options})
       this.setState({loaded:true})
+      this.setState({keywordsJson:result.keywordsJson})
     }).then(()=>{
       this.loadNewItem()
       this.setState({loaded:true})
@@ -177,7 +198,6 @@ class App extends Component {
         case 89: document.getElementById("yesBtn").click();break;
         case 78: document.getElementById("noBtn").click();break;
         case 67: document.getElementById("checkBtn").click();break;
-        case 13:if(!this.state.correct) this.selectRef.focus();break;
         default: break;
       }
     }
@@ -189,8 +209,7 @@ class App extends Component {
       let description=""
       try{
         currentTopic = this.state.topicPrev.replace(/[["\]]/g, '');
-        titleTextList = this.state.title.split(/[ ,.&@:;()/]+/);
-        // .replace(/[^A-Za-z0-9\s-']/ig, '')
+      titleTextList = this.state.title.split(/[ !@#$%^&*()-=_+:",.?/]+/);
         description = this.state.description
       } catch{
         currentTopic="Error: Invalid Data"
@@ -226,7 +245,7 @@ class App extends Component {
               <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                 <button id="arrowDown" 
                   onClick={this.indexDown} 
-                  disabled={this.state.index===0?'disabled' : null} 
+                  disabled={(this.state.index===0||this.state.arrowDisabled)?'disabled': null} 
                   className=" btn-floating btn-large waves-effect waves-light orange">
                     <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                 </button>
@@ -235,28 +254,26 @@ class App extends Component {
                 <div className="row" style={{padding:".75rem",paddingTop:"2rem",margin:"0"}}>
                   <div className="input-field col s5 m3">
                     <i className="material-icons prefix black-text">search</i>
-                    <input type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
+                    <input type="number" id="index" value={this.state.index+1} onChange={this.indexSearch}/>
                     <span id="indexSuffix"></span>
-                    <label htmlFor="index" className="active">{this.state.index}/{this.state.dataLength}</label>
+                    <label htmlFor="index" className="active">{this.state.index+1}/{this.state.dataLength}</label>
                   </div>
                   <MSelect elems={this.state.items}/>
                   <div className="col s3 hide-on-med-and-up mobileNav mobileArrowLeft"  style={{color:"white"}}>
-                    <button id="arrowDown" 
+                    <button id="arrowDown" s
                       onClick={this.indexDown} 
-                      disabled={this.state.index===0?'disabled' : null} 
+                      disabled={this.state.index===0||this.state.arrowDisabled?'disabled' : null} 
                       className=" btn-floating btn-large waves-effect waves-light orange">
                         <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                     </button>
                   </div>
                   <div className="col s6 m4 mobileNav">
-                    <button style={{borderRadius:"100px",width:"100%",marginBottom:"1rem"}} 
-                      className="waves-effect waves-light btn-large orange" ><i className="material-icons left">save</i>save
-                    </button>
+                    <Editor keywordsJson = {this.state.keywordsJson}/>
                   </div>
                   <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={{color:"white"}}>
                     <button id="arrowUp" 
                       onClick={this.indexUp} 
-                      disabled={this.state.index===this.state.dataLength-1?'disabled' : null} 
+                      disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabled?'disabled' : null} 
                       className="btn-floating btn-large waves-effect waves-light orange">
                         <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
                     </button>
@@ -326,7 +343,7 @@ class App extends Component {
               <div className="col m2 hide-on-small-only" style={{color:"white"}}>
                 <button id="arrowUp" 
                   onClick={this.indexUp} 
-                  disabled={this.state.index===this.state.dataLength-1?'disabled' : null} 
+                  disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabled?'disabled' : null} 
                   className="btn-floating btn-large waves-effect waves-light orange">
                     <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
                 </button>
@@ -349,9 +366,9 @@ class App extends Component {
               </FilePond>
             </div>
             <div className="col s6 center-align valign-wrapper" style={{minHeight:"4.75rem",}}>
-              <button style={{textTransform:"none",fontSize:".875rem",color:"#9e9e9e"}} 
+              <button style={{textTransform:"none",fontSize:".875rem",color:"#9e9e9e",margin:"auto"}} 
                 className="waves-effect waves-grey btn-flat" 
-                onClick={this.startDownload}>Export CSV
+                onClick={this.startDownload}>Export
               </button>
             </div>
           </div>

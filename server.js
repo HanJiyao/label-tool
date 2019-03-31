@@ -18,9 +18,10 @@ app.get('/api/initData', (req,res) => {
     const topicJson = require('./data/topics_keywords_latest.json')
     const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
     const fileName=['all_items_barclaysT2.csv']
-    var options=[]
-    var items=[]
-    const ordered = {};
+    let options=[]
+    let items=[]
+    let ordered = {};
+    let keywordsJson = {};
     Object.keys(topicJson).sort().forEach(function(key) {
         ordered[key] = topicJson[key];
     })
@@ -28,6 +29,7 @@ app.get('/api/initData', (req,res) => {
         if (ordered.hasOwnProperty(key)) {
             options.push({value: key, label: ordered[key].ui_text[0]});
             items.push({id:key[0], label:ordered[key].ui_text[0]})
+            keywordsJson[key] = ordered[key].keywords
         }
     }
     items.unshift({id: "", label: "Cannot be determined"}) 
@@ -70,13 +72,13 @@ app.get('/api/initData', (req,res) => {
         dataLength:displayedData.length,
         options:options,
         items:items,
-        keywordsJson:topicJson
+        keywordsJson:keywordsJson
     });
 });
 
-app.post('/api/loadNewItem', function(req, res) {
+app.get('/api/loadNewItem/:index', function(req, res) {
     const data = require('./data/all_items_Merged.json')
-    const index = req.body.index
+    const index = req.params.index
     res.json({
         dataLength: data.length,
         title: data[index].Title,
@@ -85,7 +87,6 @@ app.post('/api/loadNewItem', function(req, res) {
         topic: data[index].TopicModified===undefined?"":data[index].TopicModified,
         correct: data[index].Correct===0?false:(data[index].Correct===undefined?false:true)
     })
-    console.log("load")
 }); 
 
 app.post('/api/updateItem', function(req, res) {
@@ -121,8 +122,11 @@ app.post('/api/filterData', function(req, res) {
 app.post('/api/updateData', function(req, res) {
     const data = require('./data/all_items_Merged.json')
     let topicJson = require('./data/topics_keywords_latest.json')
+    let ordered = {}
+    let keywordsJson = {}
     let keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
     const newKeyword = req.body.newKeyword
+    const index = req.body.index
     keywordsArr.push(newKeyword)
     let filtered = data.filter((val)=>{
         let diff = []
@@ -138,13 +142,26 @@ app.post('/api/updateData', function(req, res) {
         });
     })
     topicJson[req.body.topic].keywords.push(newKeyword)
-    async function writeToFile(){
-        await fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
-        await fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
-        console.log("finish")
+    Object.keys(topicJson).sort().forEach(function(key) {
+        ordered[key] = topicJson[key];
+    })
+    for (var key in ordered) {
+        if (ordered.hasOwnProperty(key)) {
+            keywordsJson[key] = ordered[key].keywords
+        }
     }
-    writeToFile()
-    res.json({updateDone:true})
+    fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+    fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+    res.json({
+        updateDone:true,
+        dataLength: data.length,
+        title:displayedData[index].Title,
+        description:displayedData[index].Description,
+        topicPrev: data[index].Topic,
+        topic: data[index].TopicModified===undefined?"":data[index].TopicModified,
+        correct: data[index].Correct===0?false:(data[index].Correct===undefined?false:true),
+        keywordsJson:keywordsJson
+    })
 }); 
 
 const port = process.env.PORT || 3000;
