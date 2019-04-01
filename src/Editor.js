@@ -10,24 +10,21 @@ class Editor extends Component {
   componentDidMount() {
     const options = {
       onOpenStart: () => {},
-      onOpenEnd: () => {},
-      onCloseStart: () => {},
+      onOpenEnd: () => {
+        this.setState({display:true})
+      },
+      onCloseStart: () => {
+        this.setState({display:false})
+      },
       onCloseEnd: () => {},
-      dismissible: false,
+      dismissible: true,
     };
     M.Modal.init(this.EditorModal, options);
-  }
-  display=()=>{
-    this.setState({display:true})
-  }
-  endDisplay=()=>{
-    this.setState({display:false})
   }
   render() {
     return (
       <>
         <button style={{borderRadius:"100px",width:"100%",marginBottom:"1rem"}} 
-          onClick={this.display}
           data-target="editorModal"
           className="waves-effect waves-light btn-large orange modal-trigger" ><i className="material-icons left" style={{margin:"0"}}>edit</i>edit
         </button>
@@ -38,16 +35,21 @@ class Editor extends Component {
             <ReactJson 
               src={this.props.keywordsJson} 
               theme="google"
+              displayDataTypes={false}
+              sortKeys={true}
+              onEdit={this.props.editJson}
+              onAdd={this.props.editJson}
+              onDelete={this.props.editJson}
             />
-            :<></>}
+            :<h5 className="center-align white-text">Loading...</h5>}
           </div>
           <div className="modal-footer" style={{background:"rgb(29, 31, 33)"}}>
-            <button type="submit" className="modal-close waves-effect waves btn" style={{background:"rgb(57, 113, 237)"}} >
-              <i class="material-icons left">
+            <button type="submit" className="modal-close waves-effect waves btn" style={{background:"rgb(57, 113, 237)"}} onClick={this.props.jsonUpdateRefresh}>
+              <i className="material-icons left">
                 save
               </i> save
             </button>
-            <button className="modal-close waves-effect waves-grey btn-flat white-text" onClick={this.endDisplay}>
+            <button className="modal-close waves-effect waves-grey btn-flat white-text">
               Cancel
             </button>
           </div>

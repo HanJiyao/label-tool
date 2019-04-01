@@ -6,8 +6,10 @@ import MSelect from './Select'
 import Editor from './Editor'
 import Select from 'react-select';
 import axios from 'axios';
+import M from "materialize-css";
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
+import { hot } from 'react-hot-loader'
 registerPlugin();
 
 class App extends Component {
@@ -50,7 +52,10 @@ class App extends Component {
     this.startDownload = this.startDownload.bind(this);
     this.selectRef=React.createRef();
     this.jsonUpdate = this.jsonUpdate.bind(this);
+    this.getData = this.getData.bind(this)
     this.filterData = this.filterData.bind(this);
+    this.editJson = this.editJson.bind(this);
+    this.refreshData = this.refreshData.bind(this);
   }
   setCorrect(){
     this.setState({correct:true});
@@ -110,7 +115,6 @@ class App extends Component {
     await this.updateItem()
     if(this.state.index<this.state.dataLength-1){
       await this.setState({index: this.state.index+1},()=>{this.loadNewItem()});
-      
     }
   }
   async indexDown(){
@@ -120,7 +124,7 @@ class App extends Component {
       await this.setState({index: this.state.index-1},()=>{this.loadNewItem();}); 
     }
   }
-  handleTopicChange = (selectedOption) => {
+  handleTopicChange(selectedOption){
     this.setState({topic:selectedOption.label});
     this.setState({topicValue:selectedOption.value});
     this.setState({selectedOption:selectedOption});
@@ -146,7 +150,8 @@ class App extends Component {
     await axios.post('/api/updateData',{
       index:this.state.index,
       topic:this.state.topicValue,
-      newKeyword:this.state.newKeyword
+      newKeyword:this.state.newKeyword,
+      keywordsJson:this.state.keywordsJson
     }).then(async res=>{
       this.setState({title:res.data.title})
       this.setState({description:res.data.description})
@@ -164,7 +169,11 @@ class App extends Component {
     })
     .catch(err=>console.log(err))
   }
-  getData = () => {
+  editJson(result){
+    this.setState({keywordsJson:result.updated_src})
+  }
+  clearKeywords=()=>this.setState({newKeyword:'',keyword:[]})
+  getData(){
     fetch('/api/initData')
     .then(res => res.json())
     .then(result => {
@@ -178,8 +187,26 @@ class App extends Component {
       this.setState({loaded:true})
     })
   }
+  refreshData(){
+    this.setState({loaded:false})
+    fetch('/api/refreshData')
+    .then(res => res.json())
+    .then((result) => {
+      this.setState({dataLength:result.dataLength})
+      this.setState({items:result.items})
+      this.setState({options:result.options})
+      this.setState({loaded:true})
+      this.setState({keywordsJson:result.keywordsJson})
+    }).then(()=>{
+      this.loadNewItem()
+      this.setState({loaded:true})
+    })
+  }
   componentDidMount() {
     this.getData();
+    const options = {};
+    var elems = this.tooltip
+    M.Tooltip.init(elems, options);
     document.addEventListener("keydown", this.keyFunction, false);
   }
   componentWillUnmount(){
@@ -211,7 +238,7 @@ class App extends Component {
         currentTopic = this.state.topicPrev.replace(/[["\]]/g, '');
       titleTextList = this.state.title.split(/[ !@#$%^&*()-=_+:",.?/]+/);
         description = this.state.description
-      } catch{
+      } catch {
         currentTopic="Error: Invalid Data"
         titleTextList=["Error: Invalid Data"]
         description="Error: Invalid Data"
@@ -252,10 +279,15 @@ class App extends Component {
               </div>
               <div className="col m8 s12" style={{width:"100%",margin:"0"}}>
                 <div className="row" style={{padding:".75rem",paddingTop:"2rem",margin:"0"}}>
-                  <div className="input-field col s5 m3">
-                    <i className="material-icons prefix black-text">search</i>
+                  <div className="input-field col s2 left-align">
+                    <i ref={tooltip => {this.tooltip = tooltip}} id="refreshBtn" 
+                      className="material-icons prefix grey-text tooltipped" 
+                      data-position="top" data-tooltip="Reset all data"
+                      onClick={this.refreshData}>refresh
+                    </i>
+                  </div>
+                  <div className="input-field col s4 m2">
                     <input type="number" id="index" value={this.state.index+1} onChange={this.indexSearch}/>
-                    <span id="indexSuffix"></span>
                     <label htmlFor="index" className="active">{this.state.index+1}/{this.state.dataLength}</label>
                   </div>
                   <MSelect elems={this.state.items}/>
@@ -267,8 +299,15 @@ class App extends Component {
                         <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                     </button>
                   </div>
-                  <div className="col s6 m4 mobileNav">
-                    <Editor keywordsJson = {this.state.keywordsJson}/>
+                  <div className="col s6 m4">
+                    <Editor 
+                      keywordsJson = {this.state.keywordsJson} 
+                      editJson = {this.editJson} 
+                      jsonUpdateRefresh={async ()=>{
+                        await this.jsonUpdate();
+                        await this.refreshData();
+                      }} 
+                      clearKeywords={this.clearKeywords}/>
                   </div>
                   <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={{color:"white"}}>
                     <button id="arrowUp" 
@@ -383,4 +422,4 @@ class App extends Component {
     }
   }
 }
-export default App;
+export default process.env.NODE_ENV === "development" ? hot(module)(App) : App

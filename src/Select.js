@@ -14,7 +14,7 @@ class MSelect extends Component {
   }
   render() {
     return (
-        <div className="input-field col s7 m5">
+        <div className="input-field col s6 m4">
             <select multiple>
                 {this.props.elems.map((elems, i)=>
                 <option key={i} value={elems.id} style={{fontSize:"10px"}}>{elems.label}</option>)}
