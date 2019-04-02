@@ -17,6 +17,8 @@ class App extends Component {
     super(props);
     this.state = {
       loaded:false,
+      allFiles:[],
+      selectedFiles:[],
       dataLength:0,
       queryData:[],
       title:'',
@@ -37,7 +39,8 @@ class App extends Component {
       options:[],
       selectedOption:null,
       updateDone:true,
-      arrowDisabled:false,
+      arrowDisabledRight:false,
+      arrowDisabledLeft:false,
     };
     this.handleTopicChange = this.handleTopicChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -56,12 +59,17 @@ class App extends Component {
     this.filterData = this.filterData.bind(this);
     this.editJson = this.editJson.bind(this);
     this.refreshData = this.refreshData.bind(this);
+    this.clearKeywords = this.clearKeywords.bind(this);
+    this.changeFiles = this.changeFiles.bind(this);
   }
   setCorrect(){
     this.setState({correct:true});
   }
   setFalse(){
     this.setState({correct:false});
+  }
+  changeFiles(selectedFiles){
+    this.setState({selectedFiles:selectedFiles})
   }
   handleSubmit(event) {
     this.updateItem();
@@ -72,9 +80,9 @@ class App extends Component {
     if(index>this.state.dataLength-1 ){
       this.setState({index: this.state.dataLength-1},()=>{this.loadNewItem()});
     } else if (index < 0 || isNaN(index)) {
-      this.setState({index: 0},()=>{this.loadNewItem()});
+      this.setState({index:0},()=>{this.loadNewItem()});
     } else {
-      this.setState({index: index}, () => {this.loadNewItem()})
+      this.setState({index:index},()=>{this.loadNewItem()})
     }
   }
   loadNewItem(){
@@ -91,11 +99,6 @@ class App extends Component {
       this.setState({correct:res.data.correct})
       this.setState({keyword:[]})
       this.setState({checkDisabled:true}) 
-      let arrowTrigger=null;
-      clearTimeout(arrowTrigger);
-      arrowTrigger = setTimeout(()=>{
-            this.setState({arrowDisabled:false})
-        },200);
     })
     .catch(err=>console.log(err))
   }
@@ -111,17 +114,33 @@ class App extends Component {
     .catch(err=>console.log(err))
   }
   async indexUp(){
-    await this.setState({arrowDisabled:true},()=>this.forceUpdate())
+    await this.setState({arrowDisabledRight:true},()=>this.forceUpdate())
     await this.updateItem()
     if(this.state.index<this.state.dataLength-1){
-      await this.setState({index: this.state.index+1},()=>{this.loadNewItem()});
+      await this.setState({index: this.state.index+1},
+        ()=>{
+          this.loadNewItem();
+          let arrowTrigger=null;
+          clearTimeout(arrowTrigger);
+          arrowTrigger = setTimeout(()=>{
+              this.setState({arrowDisabledRight:false})
+          },300);
+      });
     }
   }
   async indexDown(){
-    await this.setState({arrowDisabled:true},()=>this.forceUpdate())
+    await this.setState({arrowDisabledLeft:true},()=>this.forceUpdate())
     await this.updateItem()
     if(this.state.index>=0){
-      await this.setState({index: this.state.index-1},()=>{this.loadNewItem();}); 
+      await this.setState({index: this.state.index-1},
+        ()=>{
+          this.loadNewItem();
+          let arrowTrigger=null;
+          clearTimeout(arrowTrigger);
+          arrowTrigger = setTimeout(()=>{
+              this.setState({arrowDisabledLeft:false})
+          },300);
+      }); 
     }
   }
   handleTopicChange(selectedOption){
@@ -172,7 +191,9 @@ class App extends Component {
   editJson(result){
     this.setState({keywordsJson:result.updated_src})
   }
-  clearKeywords=()=>this.setState({newKeyword:'',keyword:[]})
+  clearKeywords(){
+    this.setState({newKeyword:'',keyword:[]})
+  }
   getData(){
     fetch('/api/initData')
     .then(res => res.json())
@@ -182,25 +203,37 @@ class App extends Component {
       this.setState({options:result.options})
       this.setState({loaded:true})
       this.setState({keywordsJson:result.keywordsJson})
+      this.setState({allFiles:result.file,selectedFiles:result.file})
     }).then(()=>{
       this.loadNewItem()
       this.setState({loaded:true})
     })
   }
-  refreshData(){
-    this.setState({loaded:false})
-    fetch('/api/refreshData')
-    .then(res => res.json())
-    .then((result) => {
-      this.setState({dataLength:result.dataLength})
-      this.setState({items:result.items})
-      this.setState({options:result.options})
-      this.setState({loaded:true})
-      this.setState({keywordsJson:result.keywordsJson})
-    }).then(()=>{
-      this.loadNewItem()
-      this.setState({loaded:true})
+  async refreshData(){
+    this.clearKeywords()
+    this.setState({updateDone:false})
+    this.setState({title:'Loading。。。'})
+    this.setState({description:'Please be patient (´・ω・｀)'})
+    await axios.post('/api/refreshData',{
+      index:this.state.index,
+      selectedFiles:this.state.selectedFiles,
+      keywordsJson:this.state.keywordsJson
+    }).then(async res=>{
+      this.setState({title:res.data.title})
+      this.setState({description:res.data.description})
+      let topic = res.data.topic
+      this.setState({dataLength:res.data.dataLength})
+      this.setState({topicPrev:res.data.topicPrev})
+      this.setState({topic:topic})
+      this.setState({selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic)})
+      this.setState({topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value})
+      this.setState({correct:res.data.correct})
+      this.setState({keyword:[]})
+      this.setState({checkDisabled:true}) 
+      await this.setState({keywordsJson:res.data.keywordsJson})
+      this.setState({updateDone:res.data.updateDone})
     })
+    .catch(err=>console.log(err))
   }
   componentDidMount() {
     this.getData();
@@ -236,7 +269,7 @@ class App extends Component {
       let description=""
       try{
         currentTopic = this.state.topicPrev.replace(/[["\]]/g, '');
-      titleTextList = this.state.title.split(/[ !@#$%^&*()-=_+:",.?/]+/);
+      titleTextList = this.state.title.split(/[ !@#$%^&*()-=_+:",.?®™/]+/);
         description = this.state.description
       } catch {
         currentTopic="Error: Invalid Data"
@@ -272,29 +305,34 @@ class App extends Component {
               <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                 <button id="arrowDown" 
                   onClick={this.indexDown} 
-                  disabled={(this.state.index===0||this.state.arrowDisabled)?'disabled': null} 
+                  disabled={(this.state.index===0||this.state.arrowDisabledLeft)?'disabled': null} 
                   className=" btn-floating btn-large waves-effect waves-light orange">
                     <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                 </button>
               </div>
               <div className="col m8 s12" style={{width:"100%",margin:"0"}}>
                 <div className="row" style={{padding:".75rem",paddingTop:"2rem",margin:"0"}}>
-                  <div className="input-field col s2 left-align">
+                  <div className="input-field col s4 m2">
+                    <input type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
+                    <label htmlFor="index" className="active">{this.state.index}/{this.state.dataLength}</label>
+                  </div>
+                  <MSelect 
+                    elems={this.state.items} 
+                    selectedFiles={this.state.selectedFiles} 
+                    changeFiles={this.changeFiles}
+                  />
+                  <div className="input-field col s1 left-align">
                     <i ref={tooltip => {this.tooltip = tooltip}} id="refreshBtn" 
                       className="material-icons prefix grey-text tooltipped" 
                       data-position="top" data-tooltip="Reset all data"
-                      onClick={this.refreshData}>refresh
+                      onClick={this.refreshData}
+                      title="Tip: this would take a while">cached
                     </i>
                   </div>
-                  <div className="input-field col s4 m2">
-                    <input type="number" id="index" value={this.state.index+1} onChange={this.indexSearch}/>
-                    <label htmlFor="index" className="active">{this.state.index+1}/{this.state.dataLength}</label>
-                  </div>
-                  <MSelect elems={this.state.items}/>
                   <div className="col s3 hide-on-med-and-up mobileNav mobileArrowLeft"  style={{color:"white"}}>
                     <button id="arrowDown" s
                       onClick={this.indexDown} 
-                      disabled={this.state.index===0||this.state.arrowDisabled?'disabled' : null} 
+                      disabled={this.state.index===0||this.state.arrowDisabledLeft?'disabled' : null} 
                       className=" btn-floating btn-large waves-effect waves-light orange">
                         <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                     </button>
@@ -303,16 +341,13 @@ class App extends Component {
                     <Editor 
                       keywordsJson = {this.state.keywordsJson} 
                       editJson = {this.editJson} 
-                      jsonUpdateRefresh={async ()=>{
-                        await this.jsonUpdate();
-                        await this.refreshData();
-                      }} 
+                      jsonUpdateRefresh={this.refreshData} 
                       clearKeywords={this.clearKeywords}/>
                   </div>
                   <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={{color:"white"}}>
                     <button id="arrowUp" 
                       onClick={this.indexUp} 
-                      disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabled?'disabled' : null} 
+                      disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
                       className="btn-floating btn-large waves-effect waves-light orange">
                         <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
                     </button>
@@ -382,35 +417,36 @@ class App extends Component {
               <div className="col m2 hide-on-small-only" style={{color:"white"}}>
                 <button id="arrowUp" 
                   onClick={this.indexUp} 
-                  disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabled?'disabled' : null} 
+                  disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
                   className="btn-floating btn-large waves-effect waves-light orange">
                     <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
                 </button>
               </div>
             </div>
           </div>    
-          <div className="row">            
-            <div className="col s6">
+          {/* <div className="row">            
+            <div className="col s6"> */}
               <FilePond ref={ref => this.pond = ref}
-                labelIdle='Import'
+                labelIdle='Import Data Here'
                 files={this.state.files}
                 allowMultiple={true}
                 maxFiles={3}
+                name={"file"}
                 server="/api/upload"
                 onupdatefiles={(fileItems) => {
                   this.setState({
                     files: fileItems.map(fileItem => fileItem.file)
-                  });
+                  },()=>this.refreshData);
                 }}>
               </FilePond>
-            </div>
+            {/* </div>
             <div className="col s6 center-align valign-wrapper" style={{minHeight:"4.75rem",}}>
               <button style={{textTransform:"none",fontSize:".875rem",color:"#9e9e9e",margin:"auto"}} 
                 className="waves-effect waves-grey btn-flat" 
                 onClick={this.startDownload}>Export
               </button>
-            </div>
-          </div>
+            </div> 
+          </div>*/}
         </div>
       );
     } else {
