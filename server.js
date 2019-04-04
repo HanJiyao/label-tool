@@ -94,7 +94,7 @@ app.get('/api/initData', (req,res) => {
                     });
                 })
                 console.log("display items: ", displayedData.length)
-                fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+                fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
             } 
         }
     } 
@@ -204,8 +204,8 @@ app.post('/api/updateData', function(req, res) {
         keywordsJson[i] = topicJson[i].keywords
     }
     if (displayedData.length!==0){
-        fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
-        fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     }
     res.json({
         updateDone:true,
@@ -222,9 +222,9 @@ app.post('/api/refreshData', function(req, res) {
     const files = fs.readdirSync('./data')
     let topicJson = require('./data/topics_keywords_latest.json')
     let keywordsJson = {}
-    for (var k in topicJson) {
-        if (topicJson.hasOwnProperty(k)) {
-            keywordsJson[k] = topicJson[k].keywords
+    for (var x in topicJson) {
+        if (topicJson.hasOwnProperty(x)) {
+            keywordsJson[x] = topicJson[x].keywords
         }
     }
     let fileNameList = []
@@ -280,10 +280,10 @@ app.post('/api/refreshData', function(req, res) {
                     });
                 })
                 console.log("display items: ", displayedData.length)
-                fs.writeFile('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+                fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
             } 
         }
-        fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         res.json({
             items:items,
             updateDone:true,

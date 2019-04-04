@@ -69,29 +69,33 @@ class App extends Component {
     this.setState({correct:false, dataModified:true});
   }
   handleTopicChange(selectedOption){
-    this.setState({topic:selectedOption.label});
-    this.setState({topicValue:selectedOption.value});
-    this.setState({selectedOption:selectedOption});
-    this.setState({dataModified:true});
-    if(this.state.keyword.length!==0)
-      this.setState({checkDisabled:false})
+    this.setState({
+      topic:selectedOption.label,
+      topicValue:selectedOption.value,
+      selectedOption:selectedOption,
+      dataModified:true
+    })
+    if(this.state.keyword.length!==0) this.setState({checkDisabled:false})
   } 
   loadNewItem(){
     this.setState({dataModified:false})
     axios.get('/api/loadNewItem/'+this.state.index)
     .then(res=>{
       let topic = res.data.topic
-      this.setState({dataLength:res.data.dataLength})
-      this.setState({title:res.data.title})
-      this.setState({description:res.data.description})
-      this.setState({topicPrev:res.data.topicPrev})
-      this.setState({topic:topic})
-      this.setState({selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic)})
-      this.setState({topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value})
-      this.setState({correct:res.data.correct})
-      this.setState({keyword:[]})
-      this.setState({checkDisabled:true}) 
-      this.setState({arrowDisabledLeft:false,arrowDisabledRight:false})
+      this.setState({
+        dataLength:res.data.dataLength,
+        title:res.data.title,
+        description:res.data.description,
+        topicPrev:res.data.topicPrev,
+        topic:topic,
+        selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic),
+        topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value,
+        correct:res.data.correct,
+        keyword:[],
+        checkDisabled:true,
+        arrowDisabledLeft:false,
+        arrowDisabledRight:false
+      })
     })
     .catch(err=>console.log(err))
   }
@@ -110,7 +114,6 @@ class App extends Component {
           correct:this.state.correct===true?1:0,
           topicModified:this.state.topic
         }).then((res)=>{
-          console.log("update item "+this.state.index, res.data.updateDone)
           if(res.data.updateDone){
             this.setState({index: this.state.index+1},()=>this.loadNewItem())
           }
@@ -130,7 +133,6 @@ class App extends Component {
           correct:this.state.correct===true?1:0,
           topicModified:this.state.topic
         }).then((res)=>{
-          console.log("update item "+this.state.index, res.data.updateDone)
           if(res.data.updateDone){
             this.setState({index: this.state.index+1},()=>this.loadNewItem())
           }
@@ -150,7 +152,6 @@ class App extends Component {
           correct:this.state.correct===true?1:0,
           topicModified:this.state.topic
         }).then((res)=>{
-          console.log("update item "+this.state.index, res.data.updateDone)
           if(res.data.updateDone){
             this.setState({index: this.state.index-1},()=>this.loadNewItem())
           }
@@ -162,35 +163,38 @@ class App extends Component {
   filterData(){
     axios.post('/api/filterData',{keywords:this.state.keyword})
       .then(res=>{
-        this.setState({newKeyword:res.data.queryKeyword})
-        this.setState({queryData:res.data.queryData})
+        this.setState({newKeyword:res.data.queryKeyword, queryData:res.data.queryData})
       })
       .catch(err=>console.log(err))
   }
-  async jsonUpdate(){
-    this.setState({updateDone:false})
-    this.setState({title:'Loading。。。'})
-    this.setState({description:'Please be patient (´・ω・｀)'})
-    await axios.post('/api/updateData',{
+  jsonUpdate(){
+    this.setState({
+      updateDone:false,
+      title:'Loading。。。',
+      description:'Please be patient (´・ω・｀)'
+    })
+    axios.post('/api/updateData',{
       index:this.state.index,
       topic:this.state.topicValue,
       newKeyword:this.state.newKeyword,
       keywordsJson:this.state.keywordsJson
-    }).then(async res=>{
-      this.setState({title:res.data.title})
-      this.setState({description:res.data.description})
+    }).then(res=>{
       let topic = res.data.topic
-      this.setState({dataLength:res.data.dataLength})
-      this.setState({topicPrev:res.data.topicPrev})
-      this.setState({topic:topic})
-      this.setState({selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic)})
-      this.setState({topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value})
-      this.setState({correct:res.data.correct})
-      this.setState({keyword:[]})
-      this.setState({checkDisabled:true}) 
-      this.setState({dataModified:false})
-      await this.setState({keywordsJson:res.data.keywordsJson})
-      this.setState({updateDone:res.data.updateDone})
+      this.setState({
+        title:res.data.title,
+        description:res.data.description,
+        dataLength:res.data.dataLength,
+        topicPrev:res.data.topicPrev,
+        topic:topic,
+        selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic),
+        topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value,
+        correct:res.data.correct,
+        keyword:[],
+        checkDisabled:true,
+        dataModified:false,
+        keywordsJson:res.data.keywordsJson,
+        updateDone:res.data.updateDone
+      })
     })
     .catch(err=>console.log(err))
   }
@@ -204,43 +208,48 @@ class App extends Component {
     fetch('/api/initData')
     .then(res => res.json())
     .then(result => {
-      this.setState({dataLength:result.dataLength})
-      this.setState({items:result.items})
-      this.setState({options:result.options})
-      this.setState({loaded:true})
-      this.setState({keywordsJson:result.keywordsJson})
-      this.setState({allFiles:result.file,selectedFiles:result.file})
+      this.setState({dataLength:result.dataLength,
+        items:result.items,
+        options:result.options,
+        loaded:true,
+        keywordsJson:result.keywordsJson,
+        allFiles:result.file,selectedFiles:result.file
+      })
     }).then(()=>{
       this.loadNewItem()
       this.setState({loaded:true})
     })
   }
-  async refreshData(){
+  refreshData(){
     this.clearKeywords()
-    this.setState({updateDone:false})
-    this.setState({title:'Loading。。。'})
-    this.setState({description:'Please be patient (´・ω・｀)'})
-    await axios.post('/api/refreshData',{
+    this.setState({
+      updateDone:false,
+      title:'Loading。。。',
+      description:'Please be patient (´・ω・｀)'
+    })
+    axios.post('/api/refreshData',{
       index:this.state.index,
       selectedFiles:this.state.selectedFiles,
       keywordsJson:this.state.keywordsJson
-    }).then(async res=>{
-      this.setState({items:res.data.items})
-      this.setState({title:res.data.title})
-      this.setState({description:res.data.description})
+    }).then(res=>{
       let topic = res.data.topic
-      this.setState({dataLength:res.data.dataLength})
-      this.setState({topicPrev:res.data.topicPrev})
-      this.setState({topic:topic})
-      this.setState({selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic)})
-      this.setState({topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value})
-      this.setState({correct:res.data.correct})
-      this.setState({keyword:[]})
-      this.setState({checkDisabled:true}) 
-      await this.setState({keywordsJson:res.data.keywordsJson})
-      this.setState({files:null})
-      this.setState({updateDone:res.data.updateDone})
-      this.setState({dataModified:false})
+      this.setState({
+        items:res.data.items,
+        title:res.data.title,
+        description:res.data.description,
+        dataLength:res.data.dataLength,
+        topicPrev:res.data.topicPrev,
+        topic:topic,
+        selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic),
+        topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value,
+        correct:res.data.correct,
+        keyword:[],
+        checkDisabled:true,
+        keywordsJson:res.data.keywordsJson,
+        files:null,
+        updateDone:res.data.updateDone,
+        dataModified:false
+      })
       const options = {};
       var elems = document.querySelectorAll('select');
       M.FormSelect.init(elems, options);
