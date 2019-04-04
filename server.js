@@ -123,8 +123,8 @@ app.get('/api/loadNewItem/:index', function(req, res) {
     catch {
         res.json({
             dataLength: 0,
-            title: "No Data Loaded",
-            description: "You can upload below",
+            title: "Error when loading new item",
+            description: "Please refresh page",
             topicPrev: "",
             topic: "",
             correct: false
@@ -133,13 +133,13 @@ app.get('/api/loadNewItem/:index', function(req, res) {
 }); 
 
 app.post('/api/updateItem', function(req, res) {
-    let data = require('./data/all_items_Merged.json')
     const index = req.body.index
+    let data = require('./data/all_items_Merged.json')
     data[index].Correct = req.body.correct
     data[index].TopicModified = req.body.topicModified
     fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(data) , 'utf-8',(err,result)=>{if(err) console.log(err)});
-    console.log("updated")
-    res.json()
+    console.log("updated item "+index)
+    res.json({updateDone:true})
 }); 
 
 app.post('/api/filterData', function(req, res) {
@@ -151,9 +151,7 @@ app.post('/api/filterData', function(req, res) {
             return 1;
         return 0;
     })
-    queryKeyword = queryKeyword.map((item,i)=>{
-        return item.word
-    }).join(" ").toLowerCase()
+    queryKeyword = queryKeyword.map(item=>{return item.word}).join(" ").toLowerCase().trim()
     let queryData = data.filter((item)=>{
         return (item.Title.toLowerCase().indexOf(queryKeyword)!==-1)
     })
@@ -221,15 +219,28 @@ app.post('/api/updateData', function(req, res) {
     })
 }); 
 app.post('/api/refreshData', function(req, res) {
+    const files = fs.readdirSync('./data')
+    let topicJson = require('./data/topics_keywords_latest.json')
+    let keywordsJson = {}
+    for (var k in topicJson) {
+        if (topicJson.hasOwnProperty(k)) {
+            keywordsJson[k] = topicJson[k].keywords
+        }
+    }
+    let fileNameList = []
+    let items = []
+    files.forEach(function (file) {
+        if(path.extname('./data'+file)===".csv"){
+            fileNameList.push(file)
+            items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
+        }
+    })
     const fileName=req.body.selectedFiles
-    if(req.body.keywordsJson.length!==0){
-        let topicJson = require('./data/topics_keywords_latest.json')
+    if(fileName.length!==0){
         for(var k in topicJson){topicJson[k].keywords = req.body.keywordsJson[k]}
         const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
         let options=[]
-        let items=[]
         let ordered = {};
-        let keywordsJson = {};
         const index = req.body.index
         Object.keys(topicJson).sort().forEach(function(key) {
             ordered[key] = topicJson[key];
@@ -237,11 +248,9 @@ app.post('/api/refreshData', function(req, res) {
         for (var key in ordered) {
             if (ordered.hasOwnProperty(key)) {
                 options.push({value: key, label: ordered[key].ui_text[0]});
-                items.push({id:key[0], label:ordered[key].ui_text[0]})
                 keywordsJson[key] = ordered[key].keywords
             }
         }
-        items.unshift({id: "", label: "Cannot be determined"}) 
         var data = []
         var displayedData = []
         for (var i = 0; i < fileName.length; i++){
@@ -276,6 +285,7 @@ app.post('/api/refreshData', function(req, res) {
         }
         fs.writeFile('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         res.json({
+            items:items,
             updateDone:true,
             dataLength: displayedData.length,
             title: displayedData[index].Title,
@@ -283,6 +293,18 @@ app.post('/api/refreshData', function(req, res) {
             topicPrev: displayedData[index].Topic,
             topic: displayedData[index].TopicModified===undefined?"":displayedData[index].TopicModified,
             correct: displayedData[index].Correct===0?false:(displayedData[index].Correct===undefined?false:true),
+            keywordsJson: keywordsJson
+        });
+    } else {
+        res.json({
+            items:items,
+            updateDone:true,
+            dataLength: 0,
+            title: "No data loaded",
+            description: "Please check the file selection  Σ(っ °Д °;)っ",
+            topicPrev: "",
+            topic: "",
+            correct: false,
             keywordsJson: keywordsJson
         });
     }
@@ -298,14 +320,15 @@ app.post('/api/upload', (req, res, next) => {
           return res.status(500).send(err)
         }
         res.json({
-          file: `public/${req.files.file.name}`,
+          uploaded: "finish",
         })
       }
     )
 })
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 2233;
+const host = '0.0.0.0'
 
 app.listen(port);
 
-console.log("Label App Listening at port: "+port)
+console.log("Label App Running at: "+host+":"+port)

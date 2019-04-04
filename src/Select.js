@@ -8,10 +8,10 @@ class MSelect extends Component {
     };
     this.changeFiles=this.changeFiles.bind(this)
   }
-  componentDidMount() {
+  componentDidMount() {   
     const options = {};
     var elems = document.querySelectorAll('select');
-    M.FormSelect.init(elems, options);    
+    M.FormSelect.init(elems, options);
   }
   changeFiles() {
     let selectedFiles = [];
@@ -23,7 +23,7 @@ class MSelect extends Component {
   }
   render() {
     return (
-        <div className="input-field col s7 m5">
+        <div className="input-field col s7 m4">
             <select multiple onChange={this.changeFiles} value={this.props.selectedFiles}>
                 {this.props.elems.map((elems, i)=>
                   <option key={i} value={elems.id} style={{fontSize:"10px"}} selected={(this.props.selectedFiles.indexOf(elems.id) > -1)}>{elems.label}</option>

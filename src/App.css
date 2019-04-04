@@ -83,9 +83,17 @@
 .modal.modal-fixed-footer{
   height: 100%!important;
 }
+#editorModal{
+  top:0!important
+}
+@media only screen and (min-width: 600px) {
+  .card .card-action {
+    padding:12px 8rem;
+  }
+}
 @media only screen and (max-width: 1000px) {
   #checkBtn{
-    margin-top:1.5rem
+    margin:1.5rem 0
   }
   .currentTopic{
     height: 157px!important;
@@ -95,31 +103,25 @@
   .card-content{
     padding: 0!important
   }
-  .card-action{
-    padding: 0!important
-  }
   .valign-wraper,.col.m8.s12{
     padding-top: 0!important
   }
 }
 @media only screen and (max-width: 600px) {
+  .card .card-action {
+    padding:12px 6px;
+  }
+  #cardContent{
+    padding: 0 6px!important
+  }
   .mobileNav button{
-    border-radius: 0!important;
+    border-radius: 50px;
     width: 100%!important;
     height: 56px;
-  }
-  .mobileNav{
-    padding: 0!important;
-  }
-  .mobileArrowLeft{
-    padding-left: 0.75rem!important;
   }
   .mobileArrowLeft button{
     border-bottom-left-radius: 100px!important;
     border-top-left-radius: 100px!important;
-  }
-  .mobileArrowRight{
-    padding-right: 0.75rem!important;
   }
   .mobileArrowRight button{
     border-bottom-right-radius: 100px!important;

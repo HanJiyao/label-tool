@@ -24,12 +24,13 @@ class Editor extends Component {
   render() {
     return (
       <>
-        <button style={{borderRadius:"100px",width:"100%",marginBottom:"1rem"}} 
+        <button style={{borderRadius:"100px",width:"100%"}} 
           data-target="editorModal"
           className="waves-effect waves-light btn-large orange modal-trigger" ><i className="material-icons left" style={{margin:"0"}}>edit</i>edit
         </button>
         <div
-          ref={EditorModal => {this.EditorModal = EditorModal}} id="editorModal" className="modal modal-fixed-footer">
+          ref={EditorModal => {this.EditorModal = EditorModal}} id="editorModal" className="modal modal-fixed-footer"
+          style={{maxHeight:"100%",fontSize:"12.5px"}}>
           <div className="modal-content left-align" style={{background:"rgb(29, 31, 33)"}} id="jsonEditor">
             {this.state.display?
             <ReactJson 

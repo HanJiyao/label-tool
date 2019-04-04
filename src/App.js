@@ -28,7 +28,6 @@ class App extends Component {
       topicValue: '',
       correct: false,
       index: 0,
-      download:false,
       filter:'',
       keyword:[],
       keywordsArr:[],
@@ -39,11 +38,11 @@ class App extends Component {
       options:[],
       selectedOption:null,
       updateDone:true,
+      dataModified:false,
       arrowDisabledRight:false,
       arrowDisabledLeft:false,
     };
     this.handleTopicChange = this.handleTopicChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.setCorrect = this.setCorrect.bind(this);
     this.setFalse = this.setFalse.bind(this);
     this.indexSearch = this.indexSearch.bind(this);
@@ -51,8 +50,6 @@ class App extends Component {
     this.indexUp = this.indexUp.bind(this);
     this.keyFunction = this.keyFunction.bind(this);
     this.loadNewItem = this.loadNewItem.bind(this);
-    this.updateItem = this.updateItem.bind(this);
-    this.startDownload = this.startDownload.bind(this);
     this.selectRef=React.createRef();
     this.jsonUpdate = this.jsonUpdate.bind(this);
     this.getData = this.getData.bind(this)
@@ -62,30 +59,25 @@ class App extends Component {
     this.clearKeywords = this.clearKeywords.bind(this);
     this.changeFiles = this.changeFiles.bind(this);
   }
-  setCorrect(){
-    this.setState({correct:true});
-  }
-  setFalse(){
-    this.setState({correct:false});
-  }
   changeFiles(selectedFiles){
     this.setState({selectedFiles:selectedFiles})
   }
-  handleSubmit(event) {
-    this.updateItem();
-    event.preventDefault();
+  setCorrect(){
+    this.setState({correct:true, dataModified:true});
   }
-  indexSearch(event){
-    var index = parseInt(event.target.value)
-    if(index>this.state.dataLength-1 ){
-      this.setState({index: this.state.dataLength-1},()=>{this.loadNewItem()});
-    } else if (index < 0 || isNaN(index)) {
-      this.setState({index:0},()=>{this.loadNewItem()});
-    } else {
-      this.setState({index:index},()=>{this.loadNewItem()})
-    }
+  setFalse(){
+    this.setState({correct:false, dataModified:true});
   }
+  handleTopicChange(selectedOption){
+    this.setState({topic:selectedOption.label});
+    this.setState({topicValue:selectedOption.value});
+    this.setState({selectedOption:selectedOption});
+    this.setState({dataModified:true});
+    if(this.state.keyword.length!==0)
+      this.setState({checkDisabled:false})
+  } 
   loadNewItem(){
+    this.setState({dataModified:false})
     axios.get('/api/loadNewItem/'+this.state.index)
     .then(res=>{
       let topic = res.data.topic
@@ -99,60 +91,73 @@ class App extends Component {
       this.setState({correct:res.data.correct})
       this.setState({keyword:[]})
       this.setState({checkDisabled:true}) 
+      this.setState({arrowDisabledLeft:false,arrowDisabledRight:false})
     })
     .catch(err=>console.log(err))
   }
-  updateItem(){
-    this.setState({download:false})
-    axios.post('/api/updateItem',{
-      index:this.state.index,
-      correct:this.state.correct===true?1:0,
-      topicModified:this.state.topic
-    }).then(()=>{
-      this.forceUpdate()
-    })
-    .catch(err=>console.log(err))
+  indexSearch(event){
+    var index = parseInt(event.target.value)
+    if(index>this.state.dataLength-1 ){
+      this.setState({index: this.state.dataLength-1},()=>{this.loadNewItem()});
+    } else if (index < 0 || isNaN(index)) {
+      this.setState({index:0},()=>{this.loadNewItem()});
+    } else {
+      if(!this.state.dataModified){
+        this.setState({index:index},()=>{this.loadNewItem()})
+      } else {
+        axios.post('/api/updateItem',{
+          index:this.state.index,
+          correct:this.state.correct===true?1:0,
+          topicModified:this.state.topic
+        }).then((res)=>{
+          console.log("update item "+this.state.index, res.data.updateDone)
+          if(res.data.updateDone){
+            this.setState({index: this.state.index+1},()=>this.loadNewItem())
+          }
+        })
+        .catch(err=>console.log(err))
+      }
+    }
   }
-  async indexUp(){
-    await this.setState({arrowDisabledRight:true},()=>this.forceUpdate())
-    await this.updateItem()
+  indexUp(){
     if(this.state.index<this.state.dataLength-1){
-      await this.setState({index: this.state.index+1},
-        ()=>{
-          this.loadNewItem();
-          let arrowTrigger=null;
-          clearTimeout(arrowTrigger);
-          arrowTrigger = setTimeout(()=>{
-              this.setState({arrowDisabledRight:false})
-          },300);
-      });
+      this.setState({arrowDisabledRight:true})
+      if(!this.state.dataModified){
+        this.setState({index: this.state.index+1},()=>this.loadNewItem())
+      } else {
+        axios.post('/api/updateItem',{
+          index:this.state.index,
+          correct:this.state.correct===true?1:0,
+          topicModified:this.state.topic
+        }).then((res)=>{
+          console.log("update item "+this.state.index, res.data.updateDone)
+          if(res.data.updateDone){
+            this.setState({index: this.state.index+1},()=>this.loadNewItem())
+          }
+        })
+        .catch(err=>console.log(err))
+      }
     }
   }
-  async indexDown(){
-    await this.setState({arrowDisabledLeft:true},()=>this.forceUpdate())
-    await this.updateItem()
+  indexDown(){
     if(this.state.index>=0){
-      await this.setState({index: this.state.index-1},
-        ()=>{
-          this.loadNewItem();
-          let arrowTrigger=null;
-          clearTimeout(arrowTrigger);
-          arrowTrigger = setTimeout(()=>{
-              this.setState({arrowDisabledLeft:false})
-          },300);
-      }); 
+      this.setState({arrowDisabledLeft:true})
+      if(!this.state.dataModified){
+        this.setState({index: this.state.index-1},()=>this.loadNewItem())
+      } else {
+        axios.post('/api/updateItem',{
+          index:this.state.index,
+          correct:this.state.correct===true?1:0,
+          topicModified:this.state.topic
+        }).then((res)=>{
+          console.log("update item "+this.state.index, res.data.updateDone)
+          if(res.data.updateDone){
+            this.setState({index: this.state.index-1},()=>this.loadNewItem())
+          }
+        })
+        .catch(err=>console.log(err))
+      }
     }
-  }
-  handleTopicChange(selectedOption){
-    this.setState({topic:selectedOption.label});
-    this.setState({topicValue:selectedOption.value});
-    this.setState({selectedOption:selectedOption});
-    if(this.state.keyword.length!==0)
-      this.setState({checkDisabled:false})
-  }
-  async startDownload(){
-    await this.updateItem()
-    this.setState({download:true})
   }
   filterData(){
     axios.post('/api/filterData',{keywords:this.state.keyword})
@@ -164,8 +169,8 @@ class App extends Component {
   }
   async jsonUpdate(){
     this.setState({updateDone:false})
-    this.setState({title:'Loading...'})
-    this.setState({description:'Please be patient'})
+    this.setState({title:'Loading。。。'})
+    this.setState({description:'Please be patient (´・ω・｀)'})
     await axios.post('/api/updateData',{
       index:this.state.index,
       topic:this.state.topicValue,
@@ -183,6 +188,7 @@ class App extends Component {
       this.setState({correct:res.data.correct})
       this.setState({keyword:[]})
       this.setState({checkDisabled:true}) 
+      this.setState({dataModified:false})
       await this.setState({keywordsJson:res.data.keywordsJson})
       this.setState({updateDone:res.data.updateDone})
     })
@@ -219,6 +225,7 @@ class App extends Component {
       selectedFiles:this.state.selectedFiles,
       keywordsJson:this.state.keywordsJson
     }).then(async res=>{
+      this.setState({items:res.data.items})
       this.setState({title:res.data.title})
       this.setState({description:res.data.description})
       let topic = res.data.topic
@@ -231,20 +238,15 @@ class App extends Component {
       this.setState({keyword:[]})
       this.setState({checkDisabled:true}) 
       await this.setState({keywordsJson:res.data.keywordsJson})
+      this.setState({files:null})
       this.setState({updateDone:res.data.updateDone})
+      this.setState({dataModified:false})
+      const options = {};
+      var elems = document.querySelectorAll('select');
+      M.FormSelect.init(elems, options);
     })
     .catch(err=>console.log(err))
   }
-  componentDidMount() {
-    this.getData();
-    const options = {};
-    var elems = this.tooltip
-    M.Tooltip.init(elems, options);
-    document.addEventListener("keydown", this.keyFunction, false);
-  }
-  componentWillUnmount(){
-    document.removeEventListener("keydown", this.keyFunction, false);
-  }  
   keyFunction(event) {
     var key = event.keyCode || event.charCode || 0;
     var target = event.target || event.srcElement;
@@ -258,10 +260,30 @@ class App extends Component {
         case 89: document.getElementById("yesBtn").click();break;
         case 78: document.getElementById("noBtn").click();break;
         case 67: document.getElementById("checkBtn").click();break;
+        case 13: this.selectRef.focus();break;
         default: break;
       }
     }
   }
+  componentDidMount() {
+    this.getData();
+    const options = {};
+    var elems = this.tooltip
+    M.Tooltip.init(elems, options);
+    document.addEventListener('FilePond:processfile', e => {
+      if (e.detail.error) {
+          console.log('Upload Failed');
+          return;
+      }
+      this.setState({
+        selectedFiles: [...this.state.selectedFiles, this.state.files[0].name]
+      },()=>this.refreshData())
+    });
+    document.addEventListener("keydown", this.keyFunction, false);
+  }
+  componentWillUnmount(){
+    document.removeEventListener("keydown", this.keyFunction, false);
+  }  
   render() {
     if(this.state.loaded){
       let currentTopic=""
@@ -269,7 +291,7 @@ class App extends Component {
       let description=""
       try{
         currentTopic = this.state.topicPrev.replace(/[["\]]/g, '');
-      titleTextList = this.state.title.split(/[ !@#$%^&*()-=_+:",.?®™/]+/);
+        titleTextList = this.state.title.split(/\W+/);
         description = this.state.description
       } catch {
         currentTopic="Error: Invalid Data"
@@ -284,14 +306,22 @@ class App extends Component {
               if(this.state.keyword.find(element=>element.word===word)===undefined){
                 this.setState(prevState => ({
                   keyword: [...prevState.keyword, {key:i,word:word}]
-                }))
+                }),()=>{
+                  if(this.state.topic!==""&&this.state.keyword.length!==0)
+                  this.setState({checkDisabled:false})  
+                  else
+                  this.setState({checkDisabled:true})
+                })
               } else {
                 this.setState(prevState => ({
                   keyword: prevState.keyword.filter(keyword => keyword.word !== word)
-                }));
-              }
-              if(this.state.topic!=="")
-                this.setState({checkDisabled:false})          
+                }),()=>{
+                  if(this.state.topic!==""&&this.state.keyword.length!==0)
+                  this.setState({checkDisabled:false})  
+                  else
+                  this.setState({checkDisabled:true})  
+                })
+              }                 
           }}> {word} 
         </span>)
       return (
@@ -300,8 +330,50 @@ class App extends Component {
           <div style={{width:'100vw',height:'100vh',position:"absolute",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
             <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
           </div>:<></>}
-          <div className="card" style={{textAlign:"center",padding:"0"}} >
-            <div className="row valign-wrapper" style={{width:"100%",margin:"0"}}>
+          <div className="card" style={{textAlign:"center",paddingBottom:"1rem"}} >
+            <div className="card-action row" style={{paddingTop:"2rem",margin:"0",border:"none"}}>
+              <div className="input-field col s3 m2">
+                <input type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
+                <label htmlFor="index" className="active">{this.state.index}/{this.state.dataLength-1}</label>
+              </div>
+              <MSelect 
+                elems={this.state.items} 
+                selectedFiles={this.state.selectedFiles} 
+                changeFiles={this.changeFiles}
+              />
+              <div className="input-field col s2 left-align">
+                <i ref={tooltip => {this.tooltip = tooltip}} id="refreshBtn" 
+                  className="material-icons prefix grey-text tooltipped" 
+                  data-position="top" data-tooltip="Reset all data"
+                  onClick={this.refreshData}
+                  title="Danger: this will reload data, save keywords file first">cached
+                </i>
+              </div>
+              <div className="col s3 hide-on-med-and-up mobileNav mobileArrowLeft"  style={{color:"white"}}>
+                <button id="arrowDown" s
+                  onClick={this.indexDown} 
+                  disabled={this.state.index===0||this.state.arrowDisabledLeft?'disabled' : null} 
+                  className=" btn-floating btn-large waves-effect waves-light orange">
+                    <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
+                </button>
+              </div>
+              <div className="col s6 m4">
+                <Editor 
+                  keywordsJson = {this.state.keywordsJson} 
+                  editJson = {this.editJson} 
+                  jsonUpdateRefresh={this.refreshData} 
+                  clearKeywords={this.clearKeywords}/>
+              </div>
+              <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={{color:"white"}}>
+                <button id="arrowUp" 
+                  onClick={this.indexUp} 
+                  disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
+                  className="btn-floating btn-large waves-effect waves-light orange">
+                    <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
+                </button>
+              </div>
+            </div>
+            <div id="cardContent" className="row valign-wrapper" style={{width:"100%",margin:"0",padding:"0 24px",borderTop:"1px solid rgba(160,160,160,0.2)"}}>
               <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                 <button id="arrowDown" 
                   onClick={this.indexDown} 
@@ -310,108 +382,10 @@ class App extends Component {
                     <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                 </button>
               </div>
-              <div className="col m8 s12" style={{width:"100%",margin:"0"}}>
-                <div className="row" style={{padding:".75rem",paddingTop:"2rem",margin:"0"}}>
-                  <div className="input-field col s4 m2">
-                    <input type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
-                    <label htmlFor="index" className="active">{this.state.index}/{this.state.dataLength}</label>
-                  </div>
-                  <MSelect 
-                    elems={this.state.items} 
-                    selectedFiles={this.state.selectedFiles} 
-                    changeFiles={this.changeFiles}
-                  />
-                  <div className="input-field col s1 left-align">
-                    <i ref={tooltip => {this.tooltip = tooltip}} id="refreshBtn" 
-                      className="material-icons prefix grey-text tooltipped" 
-                      data-position="top" data-tooltip="Reset all data"
-                      onClick={this.refreshData}
-                      title="Tip: this would take a while">cached
-                    </i>
-                  </div>
-                  <div className="col s3 hide-on-med-and-up mobileNav mobileArrowLeft"  style={{color:"white"}}>
-                    <button id="arrowDown" s
-                      onClick={this.indexDown} 
-                      disabled={this.state.index===0||this.state.arrowDisabledLeft?'disabled' : null} 
-                      className=" btn-floating btn-large waves-effect waves-light orange">
-                        <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
-                    </button>
-                  </div>
-                  <div className="col s6 m4">
-                    <Editor 
-                      keywordsJson = {this.state.keywordsJson} 
-                      editJson = {this.editJson} 
-                      jsonUpdateRefresh={this.refreshData} 
-                      clearKeywords={this.clearKeywords}/>
-                  </div>
-                  <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={{color:"white"}}>
-                    <button id="arrowUp" 
-                      onClick={this.indexUp} 
-                      disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
-                      className="btn-floating btn-large waves-effect waves-light orange">
-                        <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
-                    </button>
-                  </div>
-                </div>
+              <div className="col m8 s12" style={{margin:"0"}}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
-                  <h5 id="customScroll"  className="col s12" style={{height:"4.2rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleList}</h5>
-                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll"}}>{description}</h6>
-                </div>
-                <div className="card-action" style={{textAlign:"left",paddingTop:"0",}}>
-                  {(this.state.correct)?
-                    <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>
-                      <h5 className="col s12 center-align" style={(currentTopic===""||currentTopic==="Cannot be determined")?{color:"red"}:null}>
-                        <strong >{currentTopic===""?"Cannot be determined":currentTopic}</strong>
-                      </h5>
-                    </div>
-                    :
-                    <div className="row" style={this.state.correct ? {display:'none'} : {paddingTop:"2rem",margin:"0",height:"85px"}}>
-                      <div className="col s12 l6">
-                        <Select 
-                          placeholder="Select Topic ..."
-                          classNamePrefix="react-select"
-                          ref={ref => { this.selectRef = ref; }}
-                          blurInputOnSelect
-                          value={this.state.selectedOption}
-                          options={this.state.options} 
-                          onChange={this.handleTopicChange}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: '10px'})}
-                        />
-                      </div>
-                      <div className="col s12 l6">
-                        <Modal 
-                          checkDisabled ={this.state.checkDisabled}
-                          jsonUpdate = {this.jsonUpdate}
-                          filterData = {this.filterData}
-                          queryData = {this.state.queryData}
-                          newKeyword = {this.state.newKeyword}
-                          topic = {this.state.topic}
-                        />
-                      </div>
-                    </div>
-                  }
-                  <div className="row">
-                    <div className="col s12">
-                      <div className="row" style={{paddingTop:"1.5rem",margin:"0",}}>
-                        <div className="col s6">
-                          <button id="yesBtn"
-                            style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
-                            className={this.state.correct ? 'waves-effect waves-light btn-large green': 'waves-effect waves-light btn-large grey'} 
-                            onClick={this.setCorrect}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">check</i>yes
-                          </button>
-                        </div>
-                        <div className="col s6">
-                          <button id="noBtn"
-                            style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
-                            className={this.state.correct ? 'waves-effect waves-light btn-large grey': 'waves-effect waves-light btn-large red'} 
-                            onClick={this.setFalse}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">clear</i>no
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <h5 id="customScroll"  className="col s12" style={{height:"4.2rem",overflowY:"scroll",fontSize:"1.8rem",padding:"0"}}>{titleList}</h5>
+                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word",padding:"0"}}>{description}</h6>
                 </div>
               </div>
               <div className="col m2 hide-on-small-only" style={{color:"white"}}>
@@ -423,30 +397,70 @@ class App extends Component {
                 </button>
               </div>
             </div>
+            <div className="card-action" style={{textAlign:"left",paddingTop:"0",}}>
+              {(this.state.correct)?
+                <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>
+                  <h5 className="col s12 center-align" style={(currentTopic===""||currentTopic==="Cannot be determined")?{color:"red"}:null}>
+                    <strong >{currentTopic===""?"Cannot be determined":currentTopic}</strong>
+                  </h5>
+                </div>
+                :
+                <div className="row" style={this.state.correct ? {display:'none'} : {paddingTop:"2rem",margin:"0",height:"85px"}}>
+                  <div className="col s12 l6">
+                    <Select 
+                      placeholder="Select Topic ..."
+                      classNamePrefix="react-select"
+                      ref={ref => { this.selectRef = ref; }}
+                      blurInputOnSelect
+                      value={this.state.selectedOption}
+                      options={this.state.options} 
+                      onChange={this.handleTopicChange}
+                      theme={(theme) => ({
+                        ...theme,
+                        borderRadius: '10px'})}
+                    />
+                  </div>
+                  <div className="col s12 l6">
+                    <Modal 
+                      checkDisabled ={this.state.checkDisabled}
+                      jsonUpdate = {this.jsonUpdate}
+                      filterData = {this.filterData}
+                      queryData = {this.state.queryData}
+                      newKeyword = {this.state.newKeyword}
+                      topic = {this.state.topic}
+                    />
+                  </div>
+                </div>
+              }
+              <div className="row" style={{paddingTop:"1.5rem",margin:"0",}}>
+                <div className="col s6">
+                  <button id="yesBtn"
+                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
+                    className={this.state.correct ? 'waves-effect waves-light btn-large green': 'waves-effect waves-light btn-large grey'} 
+                    onClick={this.setCorrect}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">check</i>yes
+                  </button>
+                </div>
+                <div className="col s6">
+                  <button id="noBtn"
+                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
+                    className={this.state.correct ? 'waves-effect waves-light btn-large grey': 'waves-effect waves-light btn-large red'} 
+                    onClick={this.setFalse}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">clear</i>no
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>    
-          {/* <div className="row">            
-            <div className="col s6"> */}
-              <FilePond ref={ref => this.pond = ref}
-                labelIdle='Import Data Here'
-                files={this.state.files}
-                allowMultiple={true}
-                maxFiles={3}
-                name={"file"}
-                server="/api/upload"
-                onupdatefiles={(fileItems) => {
-                  this.setState({
-                    files: fileItems.map(fileItem => fileItem.file)
-                  },()=>this.refreshData);
-                }}>
-              </FilePond>
-            {/* </div>
-            <div className="col s6 center-align valign-wrapper" style={{minHeight:"4.75rem",}}>
-              <button style={{textTransform:"none",fontSize:".875rem",color:"#9e9e9e",margin:"auto"}} 
-                className="waves-effect waves-grey btn-flat" 
-                onClick={this.startDownload}>Export
-              </button>
-            </div> 
-          </div>*/}
+          <FilePond ref={ref => this.pond = ref}
+            labelIdle='Import Data Here'
+            files={this.state.files}
+            name={"file"}
+            server="/api/upload"
+            onupdatefiles={(fileItems) => {
+              this.setState({
+                files: fileItems.map(fileItem => fileItem.file)
+              });
+            }}>
+          </FilePond>
         </div>
       );
     } else {
