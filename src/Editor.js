@@ -24,9 +24,10 @@ class Editor extends Component {
   render() {
     return (
       <>
-        <button style={{borderRadius:"100px",width:"100%"}} 
+        <button
           data-target="editorModal"
-          className="waves-effect waves-light btn-large orange modal-trigger" ><i className="material-icons left" style={{margin:"0"}}>edit</i>edit
+          className="btn-floating btn-large halfway-fab waves-effect waves-light teal deep-orange modal-trigger hide-on-small-only" >
+          <i className="material-icons left">edit</i>
         </button>
         <div
           ref={EditorModal => {this.EditorModal = EditorModal}} id="editorModal" className="modal modal-fixed-footer"
@@ -37,7 +38,6 @@ class Editor extends Component {
               src={this.props.keywordsJson} 
               theme="google"
               displayDataTypes={false}
-              sortKeys={true}
               onEdit={this.props.editJson}
               onAdd={this.props.editJson}
               onDelete={this.props.editJson}
@@ -46,7 +46,7 @@ class Editor extends Component {
           </div>
           <div className="modal-footer" style={{background:"rgb(29, 31, 33)"}}>
             <button type="submit" className="modal-close waves-effect waves btn" style={{background:"rgb(57, 113, 237)"}} onClick={this.props.jsonUpdateRefresh}>
-              <i className="material-icons left">
+              <i className="material-icons left" style={{lineHeight:"1.5"}}>
                 save
               </i> save
             </button>

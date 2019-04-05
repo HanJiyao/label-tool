@@ -52,7 +52,7 @@ class App extends Component {
     this.loadNewItem = this.loadNewItem.bind(this);
     this.selectRef=React.createRef();
     this.jsonUpdate = this.jsonUpdate.bind(this);
-    this.getData = this.getData.bind(this)
+    this.initData = this.initData.bind(this)
     this.filterData = this.filterData.bind(this);
     this.editJson = this.editJson.bind(this);
     this.refreshData = this.refreshData.bind(this);
@@ -204,20 +204,23 @@ class App extends Component {
   clearKeywords(){
     this.setState({newKeyword:'',keyword:[]})
   }
-  getData(){
+  initData(){
+    this.setState({updateDone:false})
     fetch('/api/initData')
     .then(res => res.json())
     .then(result => {
-      this.setState({dataLength:result.dataLength,
+      this.setState({
+        dataLength:result.dataLength,
         items:result.items,
         options:result.options,
         loaded:true,
         keywordsJson:result.keywordsJson,
-        allFiles:result.file,selectedFiles:result.file
+        allFiles:result.file,selectedFiles:result.file,
+        files:null
       })
     }).then(()=>{
       this.loadNewItem()
-      this.setState({loaded:true})
+      this.setState({loaded:true,updateDone:true})
     })
   }
   refreshData(){
@@ -275,18 +278,19 @@ class App extends Component {
     }
   }
   componentDidMount() {
-    this.getData();
-    const options = {};
-    var elems = this.tooltip
-    M.Tooltip.init(elems, options);
+    this.initData()
     document.addEventListener('FilePond:processfile', e => {
       if (e.detail.error) {
           console.log('Upload Failed');
           return;
-      }
+      } else 
       this.setState({
         selectedFiles: [...this.state.selectedFiles, this.state.files[0].name]
-      },()=>this.refreshData())
+      },()=>{
+        if (e.detail.file.filename==='topics_keywords_latest.json'||e.detail.file.filename==='all_items_Merged.json') 
+        this.initData()
+        else this.refreshData()
+      })
     });
     document.addEventListener("keydown", this.keyFunction, false);
   }
@@ -340,127 +344,133 @@ class App extends Component {
             <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
           </div>:<></>}
           <div className="card" style={{textAlign:"center",paddingBottom:"1rem"}} >
-            <div className="card-action row" style={{paddingTop:"2rem",margin:"0",border:"none"}}>
-              <div className="input-field col s3 m2">
-                <input type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
-                <label htmlFor="index" className="active">{this.state.index}/{this.state.dataLength-1}</label>
+            <nav class="nav-extended orange">
+              <div class="nav-wrapper orange">
+                <form style={{height:"64px"}}>
+                  <div class="input-field orange">
+                    <input id="search" type="search" />
+                    <label class="label-icon" for="search"><i class="material-icons" style={{lineHeight:"64px"}}>search</i></label>
+                  </div>
+                </form>
+                <ul style={{position:"absolute",top:"0",right:"0"}}>
+                  <li><a href="/api/download"><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
+                  <li><a href="/"><i class="material-icons" style={{paddingTop: "3.6px"}}>refresh</i></a></li>
+                  <li><a href="#!" class="dropdown-trigger"  data-target="dropdownMenu" style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
+                </ul>
               </div>
-              <MSelect 
-                elems={this.state.items} 
-                selectedFiles={this.state.selectedFiles} 
-                changeFiles={this.changeFiles}
-              />
-              <div className="input-field col s2 left-align">
-                <i ref={tooltip => {this.tooltip = tooltip}} id="refreshBtn" 
-                  className="material-icons prefix grey-text tooltipped" 
-                  data-position="top" data-tooltip="Reset all data"
-                  onClick={this.refreshData}
-                  title="Danger: this will reload data, save keywords file first">cached
-                </i>
-              </div>
-              <div className="col s3 hide-on-med-and-up mobileNav mobileArrowLeft"  style={{color:"white"}}>
-                <button id="arrowDown" s
-                  onClick={this.indexDown} 
-                  disabled={this.state.index===0||this.state.arrowDisabledLeft?'disabled' : null} 
-                  className=" btn-floating btn-large waves-effect waves-light orange">
-                    <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
-                </button>
-              </div>
-              <div className="col s6 m4">
+              <div class="nav-content">
+                <div className="row" style={{margin:"0",padding:"30px 8px 0 8px"}}>
+                  <div className="input-field col s3 m2">
+                    <input style={{color:"white"}} type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
+                    <label htmlFor="index" className="active" style={{fontSize:"1.2rem"}}>{this.state.index}/{this.state.dataLength-1}</label>
+                  </div>
+                  <MSelect 
+                    elems={this.state.items} 
+                    selectedFiles={this.state.selectedFiles} 
+                    changeFiles={this.changeFiles}
+                  />
+                  <div className="col s2 m1">
+                    <i id="refreshBtn" 
+                      style={{fontSize:"2.5rem",lineHeight:"3rem"}}
+                      className="material-icons white-text"
+                      onClick={this.refreshData}
+                      title="This will reload data, save keywords file first">cached
+                    </i>
+                  </div>
+                </div>
                 <Editor 
                   keywordsJson = {this.state.keywordsJson} 
                   editJson = {this.editJson} 
                   jsonUpdateRefresh={this.refreshData} 
-                  clearKeywords={this.clearKeywords}/>
+                  clearKeywords={this.clearKeywords}
+                />    
               </div>
-              <div className="col s3 hide-on-med-and-up mobileNav mobileArrowRight" style={{color:"white"}}>
-                <button id="arrowUp" 
-                  onClick={this.indexUp} 
-                  disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
-                  className="btn-floating btn-large waves-effect waves-light orange">
-                    <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
-                </button>
-              </div>
-            </div>
-            <div id="cardContent" className="row valign-wrapper" style={{width:"100%",margin:"0",padding:"0 24px",borderTop:"1px solid rgba(160,160,160,0.2)"}}>
+            </nav>
+            <ul id="dropdownMenu" class="dropdown-content">
+              <li><a href="#!">one</a></li>
+              <li><a href="#!">two</a></li>
+              <li class="divider"></li>
+              <li><a href="#!">three</a></li>
+            </ul>
+            <div id="cardContent" className="row valign-wrapper" style={{width:"100%",marginTop:"2rem",padding:"0 24px"}}>
               <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                 <button id="arrowDown" 
                   onClick={this.indexDown} 
                   disabled={(this.state.index===0||this.state.arrowDisabledLeft)?'disabled': null} 
-                  className=" btn-floating btn-large waves-effect waves-light orange">
+                  className=" btn-floating btn-large waves-effect waves-light deep-orange">
                     <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
                 </button>
               </div>
               <div className="col m8 s12" style={{margin:"0"}}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
-                  <h5 id="customScroll"  className="col s12" style={{height:"4.2rem",overflowY:"scroll",fontSize:"1.8rem",padding:"0"}}>{titleList}</h5>
-                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word",padding:"0"}}>{description}</h6>
+                  <h5 id="customScroll"  className="col s12" style={{height:"4.2rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleList}</h5>
+                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{description}</h6>
+                </div>
+                <div className="card-content" style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)"}}>
+                  {(this.state.correct)?
+                    <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>
+                      <h5 className="col s12 center-align" style={(currentTopic===""||currentTopic==="Cannot be determined")?{color:"red"}:null}>
+                        <strong >{currentTopic===""?"Cannot be determined":currentTopic}</strong>
+                      </h5>
+                    </div>
+                    :
+                    <div className="row" style={this.state.correct ? {display:'none'} : {paddingTop:"2rem",margin:"0",height:"85px"}}>
+                      <div className="col s12 l6">
+                        <Select 
+                          placeholder="Select Topic ..."
+                          classNamePrefix="react-select"
+                          ref={ref => { this.selectRef = ref; }}
+                          blurInputOnSelect
+                          value={this.state.selectedOption}
+                          options={this.state.options} 
+                          onChange={this.handleTopicChange}
+                          theme={(theme) => ({
+                            ...theme,
+                            borderRadius: '10px'})}
+                        />
+                      </div>
+                      <div className="col s12 l6">
+                        <Modal 
+                          checkDisabled ={this.state.checkDisabled}
+                          jsonUpdate = {this.jsonUpdate}
+                          filterData = {this.filterData}
+                          queryData = {this.state.queryData}
+                          newKeyword = {this.state.newKeyword}
+                          topic = {this.state.topic}
+                        />
+                      </div>
+                    </div>
+                  }
+                  <div className="row" style={{paddingTop:"1.5rem",margin:"0",}}>
+                    <div className="col s6">
+                      <button id="yesBtn"
+                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
+                        className={this.state.correct ? 'waves-effect waves-light btn-large green': 'waves-effect waves-light btn-large grey'} 
+                        onClick={this.setCorrect}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">check</i>yes
+                      </button>
+                    </div>
+                    <div className="col s6">
+                      <button id="noBtn"
+                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
+                        className={this.state.correct ? 'waves-effect waves-light btn-large grey': 'waves-effect waves-light btn-large red'} 
+                        onClick={this.setFalse}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">clear</i>no
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="col m2 hide-on-small-only" style={{color:"white"}}>
                 <button id="arrowUp" 
                   onClick={this.indexUp} 
                   disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
-                  className="btn-floating btn-large waves-effect waves-light orange">
+                  className="btn-floating btn-large waves-effect waves-light deep-orange">
                     <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
                 </button>
               </div>
             </div>
-            <div className="card-action" style={{textAlign:"left",paddingTop:"0",}}>
-              {(this.state.correct)?
-                <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>
-                  <h5 className="col s12 center-align" style={(currentTopic===""||currentTopic==="Cannot be determined")?{color:"red"}:null}>
-                    <strong >{currentTopic===""?"Cannot be determined":currentTopic}</strong>
-                  </h5>
-                </div>
-                :
-                <div className="row" style={this.state.correct ? {display:'none'} : {paddingTop:"2rem",margin:"0",height:"85px"}}>
-                  <div className="col s12 l6">
-                    <Select 
-                      placeholder="Select Topic ..."
-                      classNamePrefix="react-select"
-                      ref={ref => { this.selectRef = ref; }}
-                      blurInputOnSelect
-                      value={this.state.selectedOption}
-                      options={this.state.options} 
-                      onChange={this.handleTopicChange}
-                      theme={(theme) => ({
-                        ...theme,
-                        borderRadius: '10px'})}
-                    />
-                  </div>
-                  <div className="col s12 l6">
-                    <Modal 
-                      checkDisabled ={this.state.checkDisabled}
-                      jsonUpdate = {this.jsonUpdate}
-                      filterData = {this.filterData}
-                      queryData = {this.state.queryData}
-                      newKeyword = {this.state.newKeyword}
-                      topic = {this.state.topic}
-                    />
-                  </div>
-                </div>
-              }
-              <div className="row" style={{paddingTop:"1.5rem",margin:"0",}}>
-                <div className="col s6">
-                  <button id="yesBtn"
-                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
-                    className={this.state.correct ? 'waves-effect waves-light btn-large green': 'waves-effect waves-light btn-large grey'} 
-                    onClick={this.setCorrect}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">check</i>yes
-                  </button>
-                </div>
-                <div className="col s6">
-                  <button id="noBtn"
-                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
-                    className={this.state.correct ? 'waves-effect waves-light btn-large grey': 'waves-effect waves-light btn-large red'} 
-                    onClick={this.setFalse}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">clear</i>no
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>    
           <FilePond ref={ref => this.pond = ref}
-            labelIdle='Import Data Here'
+            labelIdle='Drag & Drop or <span class="filepond--label-action"> Browse </span>'
             files={this.state.files}
             name={"file"}
             server="/api/upload"

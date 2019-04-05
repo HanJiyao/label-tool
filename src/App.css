@@ -72,10 +72,10 @@
 }
 #refreshBtn{
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color 0.3s, box-shadow 0.3s;
 }
 #refreshBtn:hover{
-  color:red!important
+  color:red!important;
 }
 .modal.bottom-sheet{
   max-height: 100%!important
@@ -84,12 +84,47 @@
   height: 100%!important;
 }
 #editorModal{
-  top:0!important
+  top:0!important;
+  line-height:1.5;
 }
-@media only screen and (min-width: 600px) {
-  .card .card-action {
-    padding:12px 8rem;
-  }
+.input-field label {
+  color: rgba(255,255,255,0.7);
+}
+/* label focus color */
+.input-field input[type=search] {
+  color: #fff;
+}
+.input-field input[type=search]:focus {
+  color:#000
+}
+.select-wrapper input.select-dropdown {
+  border-bottom: 1px solid rgba(255,255,255,0.7);
+}
+.input-field input[type=number]:focus + label {
+  color: #fff!important
+}
+.input-field input[type=number] {
+  border-bottom: 1px solid rgba(255,255,255,0.7);
+}
+.input-field input[type=number]:focus, .select-wrapper input.select-dropdown:focus {
+  border-bottom: 1px solid #fff!important;
+  box-shadow: 0 1px 0 0 #fff!important;
+}
+/* icon prefix focus color */
+.input-field .prefix.active {
+  color: #fff;
+}
+.select-wrapper input.select-dropdown {
+  color:white;
+}
+.select-dropdown{
+  overflow: hidden!important;
+}
+.dropdown-content li span{
+  color:#5a5a5a!important
+}
+.select-wrapper .caret {
+  fill:white!important
 }
 @media only screen and (max-width: 1000px) {
   #checkBtn{
@@ -108,23 +143,16 @@
   }
 }
 @media only screen and (max-width: 600px) {
+  .container{
+    width:100%!important
+  }
   .card .card-action {
     padding:12px 6px;
   }
+  .card {
+    margin: 0!important
+  }
   #cardContent{
     padding: 0 6px!important
-  }
-  .mobileNav button{
-    border-radius: 50px;
-    width: 100%!important;
-    height: 56px;
-  }
-  .mobileArrowLeft button{
-    border-bottom-left-radius: 100px!important;
-    border-top-left-radius: 100px!important;
-  }
-  .mobileArrowRight button{
-    border-bottom-right-radius: 100px!important;
-    border-top-right-radius: 100px!important;
   }
 }

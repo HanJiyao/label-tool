@@ -26,10 +26,10 @@ class MSelect extends Component {
         <div className="input-field col s7 m4">
             <select multiple onChange={this.changeFiles} value={this.props.selectedFiles}>
                 {this.props.elems.map((elems, i)=>
-                  <option key={i} value={elems.id} style={{fontSize:"10px"}} selected={(this.props.selectedFiles.indexOf(elems.id) > -1)}>{elems.label}</option>
+                  <option key={i} value={elems.id} selected={(this.props.selectedFiles.indexOf(elems.id) > -1)}>{elems.label}</option>
                 )}
             </select>
-            <label>File</label>
+            <label style={{fontSize:"1.2rem",top:"-29px"}}>choose file</label>
         </div>
     );
   }

@@ -7,6 +7,8 @@ const logger = require('morgan')
 const cookieParser = require('cookie-parser')
 const fileUpload = require('express-fileupload')
 const cors = require('cors')
+const JSZip = require("jszip");
+let zip = new JSZip();
 
 const app = express();
 // const webpack = require("webpack");
@@ -310,7 +312,7 @@ app.post('/api/refreshData', function(req, res) {
     }
 })
 
-app.post('/api/upload', (req, res, next) => {
+app.post('/api/upload', (req, res) => {
     let uploadFile = req.files.file
     const fileName = req.files.file.name
     uploadFile.mv(
@@ -320,14 +322,27 @@ app.post('/api/upload', (req, res, next) => {
           return res.status(500).send(err)
         }
         res.json({
-          uploaded: "finish",
+            uploaded: true,
         })
       }
     )
 })
 
+app.get('/api/download', (req, res) => {
+    const keywords = require("./data/topics_keywords_latest.json")
+    const data = require("./data/all_items_Merged.json")
+    zip.file("topics_keywords_latest.json", JSON.stringify(keywords, null, 4));
+    zip.file("all_items_Merged.json",JSON.stringify(data, null, 4));
+    zip
+    .generateNodeStream({type:'nodebuffer',streamFiles:true})
+    .pipe(fs.createWriteStream('./data/out.zip'))
+    .on('finish', function () {
+        res.download('./data/out.zip')
+    });
+})
+
 const port = process.env.PORT || 2233;
-const host = '0.0.0.0'
+const host = process.env.HOST || '0.0.0.0'
 
 app.listen(port);
 
