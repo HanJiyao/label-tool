@@ -276,16 +276,21 @@ class App extends Component {
   deleteFile(deleteFiles){
     let selectedFiles = this.state.selectedFiles
     for (var i in deleteFiles){
-        var index = selectedFiles.indexOf(i); 
+      if(deleteFiles[i].status){
+        var index = selectedFiles.indexOf(deleteFiles[i].file); 
         if (index > -1) {
             selectedFiles.splice(index, 1);
         }
+      }
     }
-    this.setState({selectedFiles:selectedFiles})
-    axios.post('/api/deleteFile',{
-      deleteFiles:deleteFiles,
-      selectedFiles:selectedFiles
-    }).then(res=>{if(res.data.deleteDone) this.refreshData()})
+    this.setState({selectedFiles:selectedFiles},()=>{
+      console.log('update selected:',selectedFiles)
+      console.log("delete files:",deleteFiles)
+      axios.post('/api/deleteFile',{
+        deleteFiles: deleteFiles,
+        selectedFiles:selectedFiles
+      }).then(res=>{if(res.data.deleteDone) this.refreshData()})
+    })
   }
   keyFunction(event) {
     var key = event.keyCode || event.charCode || 0;
@@ -392,7 +397,7 @@ class App extends Component {
                 </form>
                 <ul style={{position:"absolute",top:"0",right:"0"}}>
                   <li><FileMgr items = {this.state.items} selectedFiles = {this.state.selectedFiles} deleteFile = {this.deleteFile} /></li>
-                  <li><a href="/api/download"><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
+                  <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
                   <li><a href="/"><i class="material-icons" style={{paddingTop: "3.6px"}}>refresh</i></a></li>
                   <li><a href="#!" style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
                 </ul>

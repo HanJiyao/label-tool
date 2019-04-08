@@ -52,6 +52,7 @@ app.get('/api/initData', (req,res) => {
     let selectedFiles = []
     try {
         selectedFiles = require('./data/selected_files.json')
+        if (selectedFiles.length === 0) selectedFiles = fileName
     } catch {
         selectedFiles = fileName
     }
@@ -75,8 +76,8 @@ app.get('/api/initData', (req,res) => {
         require('./data/all_items_Merged.json')
         displayedData = require('./data/all_items_Merged.json')
     } catch {
-        for (var i = 0; i < fileName.length; i++){
-            var csvFilePath = fs.readFileSync("./data/"+fileName[i], "utf8"); 
+        for (var i = 0; i < selectedFiles.length; i++){
+            var csvFilePath = fs.readFileSync("./data/" + selectedFiles[i], "utf8"); 
             Papa.parse(csvFilePath, {
                 header: true,
                 skipEmptyLines: true,
@@ -85,7 +86,7 @@ app.get('/api/initData', (req,res) => {
         }
         function initData(results){
             data.push(results.data);
-            if ((data.length === fileName.length)){
+            if ((data.length === selectedFiles.length)){
                 data = [].concat.apply([], data)
                 console.log("total items: ", data.length)
                 let filtered = data.filter((val)=>{
@@ -103,7 +104,7 @@ app.get('/api/initData', (req,res) => {
                 })
                 console.log("display items: ", displayedData.length)
                 fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
-                fs.writeFileSync('./data/selected_files.json', JSON.stringify(fileName) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+                fs.writeFileSync('./data/selected_files.json', JSON.stringify(selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
             } 
         }
     } 
@@ -112,7 +113,6 @@ app.get('/api/initData', (req,res) => {
         options:options,
         items:items,
         keywordsJson:keywordsJson,
-        file:fileName,
         selectedFiles:selectedFiles
     });
 });
@@ -330,14 +330,16 @@ app.post('/api/refreshData', function(req, res) {
 })
 
 app.post('/api/deleteFile', (req, res) => {
+    console.log(req.body.deleteFiles)
+    console.log(req.body.selectedFiles)
     for (var i in req.body.deleteFiles){
-        if(req.body.deleteFiles[i]) fs.unlinkSync('./data/'+i)
+        if (req.body.deleteFiles[i].status) fs.unlinkSync('./data/' + req.body.deleteFiles[i].file)
     }
+    fs.writeFileSync('./data/selected_files.json', JSON.stringify(req.body.selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     if (req.body.selectedFiles.length===0) {
         fs.unlinkSync('./data/selected_files.json')
         fs.unlinkSync('./data/all_items_Merged.json')
     }
-    fs.writeFileSync('./data/selected_files.json', JSON.stringify(req.body.selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     res.json({deleteDone:true})
 })
 

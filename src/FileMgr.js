@@ -5,28 +5,41 @@ class FileMgr extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      files:{}
+      files:[]
     };
     this.handleChange = this.handleChange.bind(this);
   }
   componentDidMount() {
     const options = {
-      onOpenStart: () => {},
+      onOpenStart: () => {
+        let itemArr = this.props.items.map(itm => itm.id)
+        let fileArr = []
+        itemArr.map(elem => {
+          document.getElementById(elem).checked = false
+          return fileArr.push({ file: elem, status: false })})
+        this.setState({ files: fileArr })},
       onOpenEnd: () => {},
       onCloseStart: () => {},
       onCloseEnd: () => {},
       dismissible: true,
     };
     M.Modal.init(this.Modal, options);
-    let files = {}
-    this.props.items.map(item=>files[item.id]=false)
-    this.setState({files:files})
+    let itemArr = this.props.items.map(itm => itm.id)
+    let fileArr = []
+    itemArr.map(elem=>fileArr.push({file:elem,status:false}))
+    this.setState({ files: fileArr})
   }
   handleChange(e) {
     let files = this.state.files
+    let itemArr = this.props.items.map(itm => itm.id)
+    files = files.filter(itm=>{
+      return itemArr.indexOf(itm.file) > -1});
     const item = e.target.name;
     const isChecked = e.target.checked;
-    files[item]=isChecked
+    for (var i in files){
+      if(files[i].file === item) files[i].status = isChecked
+    }
+    console.log("select delete:",files)
     this.setState({files:files});
   }
   render() {
@@ -39,22 +52,25 @@ class FileMgr extends Component {
             <table className="striped highlight" style={{color:'#000'}}>
               <thead>
                 <tr>
-                  <th style={{textAlign:'center'}}>Select Delete</th>
-                  <th style={{textAlign:'center'}}>File Name</th>
-                  <th style={{textAlign:'center'}}>Status</th>
+                  <th style={{textAlign:'right',paddingTop:"24px"}}>Select</th>
+                  <th style={{ textAlign: 'center' }}>File Name</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody >
                 {this.props.items.map((item,i)=>
                 <tr key = {i}>
-                  <td style={{textAlign:'center'}}>
+                  <td style={{textAlign:'right'}}>
                     <label>
-                      <input type="checkbox" name={item.id} onChange={this.handleChange} checked={this.state.files[item.id]}/>
+                        <input type="checkbox" id={item.id} name={item.id} onChange={this.handleChange} checked={undefined}/>
                       <span></span>
                     </label>
                   </td>
-                  <td style={{textAlign:'center'}}>{item.id}</td>
-                  <td style={{textAlign:'center'}}>{(this.props.selectedFiles.indexOf(item.id)!==-1?'Active':'')}</td>
+                  <td style={{ textAlign: 'center' }}>{item.id}</td>
+                  <td>
+                  {(this.props.selectedFiles.indexOf(item.id)!==-1)?
+                  <><i class="material-icons left green-text" style={{height: "24px",lineHeight: "32px"}}>check_circle</i>Active</>:''}
+                  </td>
                 </tr>
                 )}
               </tbody>
@@ -62,7 +78,9 @@ class FileMgr extends Component {
           </div>
           <div className="modal-footer" style={{lineHeight:"1.5"}}>
             <button className="modal-close waves-effect waves red btn" 
-              onClick = {()=>this.props.deleteFile(this.state.files)}>
+              onClick = {()=>{
+                this.props.deleteFile(this.state.files)
+              }}>
               <i class="material-icons left" style={{lineHeight:"1.5"}}>
                 delete
               </i> Delete
