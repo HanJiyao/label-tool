@@ -4,8 +4,11 @@ import './App.css';
 import Modal from './Modal'
 import MSelect from './Select'
 import Editor from './Editor'
+import FileMgr from './FileMgr'
 import Select from 'react-select';
 import axios from 'axios';
+import 'materialize-css'
+import 'materialize-css/dist/css/materialize.min.css';
 import M from "materialize-css";
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
@@ -58,6 +61,9 @@ class App extends Component {
     this.refreshData = this.refreshData.bind(this);
     this.clearKeywords = this.clearKeywords.bind(this);
     this.changeFiles = this.changeFiles.bind(this);
+    this.searchData = this.searchData.bind(this);
+    this.clearSearch = this.clearSearch.bind(this);
+    this.deleteFile = this.deleteFile.bind(this);
   }
   changeFiles(selectedFiles){
     this.setState({selectedFiles:selectedFiles})
@@ -160,6 +166,12 @@ class App extends Component {
       }
     }
   }
+  searchData(index){
+    this.setState({index:index},()=>this.loadNewItem())
+  }
+  clearSearch(){
+    this.setState({keyword:[],keywordSearch:'',checkDisabled:true})
+  }
   filterData(){
     axios.post('/api/filterData',{keywords:this.state.keyword})
       .then(res=>{
@@ -202,7 +214,7 @@ class App extends Component {
     this.setState({keywordsJson:result.updated_src})
   }
   clearKeywords(){
-    this.setState({newKeyword:'',keyword:[]})
+    this.setState({newKeyword:'',keyword:[],checkDisabled:true})
   }
   initData(){
     this.setState({updateDone:false})
@@ -215,7 +227,8 @@ class App extends Component {
         options:result.options,
         loaded:true,
         keywordsJson:result.keywordsJson,
-        allFiles:result.file,selectedFiles:result.file,
+        allFiles:result.file,
+        selectedFiles:result.selectedFiles,
         files:null
       })
     }).then(()=>{
@@ -247,6 +260,7 @@ class App extends Component {
         topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value,
         correct:res.data.correct,
         keyword:[],
+        keywordSearch:'',
         checkDisabled:true,
         keywordsJson:res.data.keywordsJson,
         files:null,
@@ -258,6 +272,20 @@ class App extends Component {
       M.FormSelect.init(elems, options);
     })
     .catch(err=>console.log(err))
+  }
+  deleteFile(deleteFiles){
+    let selectedFiles = this.state.selectedFiles
+    for (var i in deleteFiles){
+        var index = selectedFiles.indexOf(i); 
+        if (index > -1) {
+            selectedFiles.splice(index, 1);
+        }
+    }
+    this.setState({selectedFiles:selectedFiles})
+    axios.post('/api/deleteFile',{
+      deleteFiles:deleteFiles,
+      selectedFiles:selectedFiles
+    }).then(res=>{if(res.data.deleteDone) this.refreshData()})
   }
   keyFunction(event) {
     var key = event.keyCode || event.charCode || 0;
@@ -346,16 +374,27 @@ class App extends Component {
           <div className="card" style={{textAlign:"center",paddingBottom:"1rem"}} >
             <nav class="nav-extended orange">
               <div class="nav-wrapper orange">
-                <form style={{height:"64px"}}>
+                <form style={{height:"64px"}} onSubmit={(e)=>{
+                  e.preventDefault()
+                  const search = this.state.keywordSearch.split(/\W+/);
+                  const searchList = search.map((word, i)=>{
+                    return {key:i, word:word}
+                  })
+                  console.log('search on :',searchList)
+                  this.setState({checkDisabled:false,keyword:searchList},()=>document.getElementById("checkBtn").click())
+                }}>
                   <div class="input-field orange">
-                    <input id="search" type="search" />
+                    <input id="search" type="search" value={this.state.keywordSearch} 
+                      onChange={(e)=>this.setState({keywordSearch:e.target.value})} 
+                    />
                     <label class="label-icon" for="search"><i class="material-icons" style={{lineHeight:"64px"}}>search</i></label>
                   </div>
                 </form>
                 <ul style={{position:"absolute",top:"0",right:"0"}}>
+                  <li><FileMgr items = {this.state.items} selectedFiles = {this.state.selectedFiles} deleteFile = {this.deleteFile} /></li>
                   <li><a href="/api/download"><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
                   <li><a href="/"><i class="material-icons" style={{paddingTop: "3.6px"}}>refresh</i></a></li>
-                  <li><a href="#!" class="dropdown-trigger"  data-target="dropdownMenu" style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
+                  <li><a href="#!" style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
                 </ul>
               </div>
               <div class="nav-content">
@@ -371,7 +410,7 @@ class App extends Component {
                   />
                   <div className="col s2 m1">
                     <i id="refreshBtn" 
-                      style={{fontSize:"2.5rem",lineHeight:"3rem"}}
+                      style={{fontSize:"2rem"}}
                       className="material-icons white-text"
                       onClick={this.refreshData}
                       title="This will reload data, save keywords file first">cached
@@ -386,12 +425,6 @@ class App extends Component {
                 />    
               </div>
             </nav>
-            <ul id="dropdownMenu" class="dropdown-content">
-              <li><a href="#!">one</a></li>
-              <li><a href="#!">two</a></li>
-              <li class="divider"></li>
-              <li><a href="#!">three</a></li>
-            </ul>
             <div id="cardContent" className="row valign-wrapper" style={{width:"100%",marginTop:"2rem",padding:"0 24px"}}>
               <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                 <button id="arrowDown" 
@@ -437,6 +470,8 @@ class App extends Component {
                           queryData = {this.state.queryData}
                           newKeyword = {this.state.newKeyword}
                           topic = {this.state.topic}
+                          searchData = {this.searchData}
+                          clearSearch = {this.clearSearch}
                         />
                       </div>
                     </div>

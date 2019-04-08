@@ -49,6 +49,12 @@ app.get('/api/initData', (req,res) => {
             items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
         }
     })
+    let selectedFiles = []
+    try {
+        selectedFiles = require('./data/selected_files.json')
+    } catch {
+        selectedFiles = fileName
+    }
     const topicJson = require('./data/topics_keywords_latest.json')
     const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
     let options=[]
@@ -97,6 +103,7 @@ app.get('/api/initData', (req,res) => {
                 })
                 console.log("display items: ", displayedData.length)
                 fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+                fs.writeFileSync('./data/selected_files.json', JSON.stringify(fileName) , 'utf-8',(err,result)=>{if(err) console.log(err)})
             } 
         }
     } 
@@ -105,7 +112,8 @@ app.get('/api/initData', (req,res) => {
         options:options,
         items:items,
         keywordsJson:keywordsJson,
-        file:fileName
+        file:fileName,
+        selectedFiles:selectedFiles
     });
 });
 
@@ -125,8 +133,8 @@ app.get('/api/loadNewItem/:index', function(req, res) {
     catch {
         res.json({
             dataLength: 0,
-            title: "Error when loading new item",
-            description: "Please refresh page",
+            title: "No data loaded",
+            description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
             topicPrev: "",
             topic: "",
             correct: false
@@ -157,6 +165,12 @@ app.post('/api/filterData', function(req, res) {
     let queryData = data.filter((item)=>{
         return (item.Title.toLowerCase().indexOf(queryKeyword)!==-1)
     })
+    let indexArr = queryData.map(item=>{
+        return data.indexOf(item)
+    })
+    for (var i in queryData){
+        queryData[i].index = indexArr[i]
+    }
     res.json({
         queryKeyword:queryKeyword,
         queryData:queryData
@@ -209,6 +223,7 @@ app.post('/api/updateData', function(req, res) {
         fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     }
+    keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
     res.json({
         updateDone:true,
         dataLength: displayedData.length,
@@ -237,6 +252,7 @@ app.post('/api/refreshData', function(req, res) {
             items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
         }
     })
+    keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
     const fileName=req.body.selectedFiles
     if(fileName.length!==0){
         for(var k in topicJson){topicJson[k].keywords = req.body.keywordsJson[k]}
@@ -286,6 +302,7 @@ app.post('/api/refreshData', function(req, res) {
             } 
         }
         fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        fs.writeFileSync('./data/selected_files.json', JSON.stringify(fileName) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         res.json({
             items:items,
             updateDone:true,
@@ -303,13 +320,25 @@ app.post('/api/refreshData', function(req, res) {
             updateDone:true,
             dataLength: 0,
             title: "No data loaded",
-            description: "Please check the file selection  Σ(っ °Д °;)っ",
+            description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
             topicPrev: "",
             topic: "",
             correct: false,
             keywordsJson: keywordsJson
         });
     }
+})
+
+app.post('/api/deleteFile', (req, res) => {
+    for (var i in req.body.deleteFiles){
+        if(req.body.deleteFiles[i]) fs.unlinkSync('./data/'+i)
+    }
+    if (req.body.selectedFiles.length===0) {
+        fs.unlinkSync('./data/selected_files.json')
+        fs.unlinkSync('./data/all_items_Merged.json')
+    }
+    fs.writeFileSync('./data/selected_files.json', JSON.stringify(req.body.selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+    res.json({deleteDone:true})
 })
 
 app.post('/api/upload', (req, res) => {

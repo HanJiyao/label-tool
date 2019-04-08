@@ -11,7 +11,7 @@ class Modal extends Component {
     const options = {
       onOpenStart: () => {},
       onOpenEnd: () => {},
-      onCloseStart: () => {},
+      onCloseStart: () => {this.props.clearSearch()},
       onCloseEnd: () => {},
       dismissible: true,
     };
@@ -34,16 +34,20 @@ class Modal extends Component {
             <table className="striped highlight">
               <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Topic</th>
-                    <th>Subject Area</th>
-                    <th>Score</th>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Topic</th>
+                  <th>Subject Area</th>
+                  <th>Score</th>
                 </tr>
               </thead>
               <tbody>
                 {this.props.queryData.map((item,i)=>
-                  <tr key={i}>
+                  <tr key={i} style={{cursor:"pointer"}}
+                    onClick={()=>{
+                      this.props.searchData(item.index)
+                      M.Modal.init(this.Modal, {onCloseStart: () => {this.props.clearSearch()}},).close();
+                    }}>
                     <td>
                       <strong>{item.Title}</strong>
                     </td>
@@ -65,6 +69,8 @@ class Modal extends Component {
             </table>
           </div>
           <div className="modal-footer">
+            {(this.props.topic!=="")?
+            <>
             <button className="btn-flat" style={{textTransform:"none",fontSize:"1.35rem"}}>
               <strong>{this.props.newKeyword} <i className="material-icons" style={{verticalAlign:"-0.2rem"}}>keyboard_arrow_right</i> {this.props.topic}</strong>
             </button>
@@ -74,10 +80,16 @@ class Modal extends Component {
                 add
               </i> Add
             </button>
-            <button className="modal-close waves-effect waves-grey btn-flat">
+            <button className="modal-close waves-effect waves-grey btn-flat" id="queryCancel">
               Cancel
             </button>
+          </>
+          :
+          <button className="modal-close waves-effect waves-grey btn-flat" id="queryCancel">
+            Cancel
+          </button>}  
           </div>
+          
         </div>
       </>
     );

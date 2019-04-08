@@ -72,15 +72,13 @@
 }
 #refreshBtn{
   cursor: pointer;
-  transition: color 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s, box-shadow 0.3s;
 }
 #refreshBtn:hover{
-  color:red!important;
+  background-color:rgba(0,0,0,0.1);
 }
-.modal.bottom-sheet{
-  max-height: 100%!important
-}
-.modal.modal-fixed-footer{
+#editorModal, #dataModal{
+  max-height: 100%!important;
   height: 100%!important;
 }
 #editorModal{
@@ -125,6 +123,10 @@
 }
 .select-wrapper .caret {
   fill:white!important
+}
+[type="checkbox"]:checked+span:not(.lever):before {
+  border-right: 3px solid red;
+  border-bottom: 3px solid red;
 }
 @media only screen and (max-width: 1000px) {
   #checkBtn{
