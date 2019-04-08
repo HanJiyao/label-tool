@@ -52,7 +52,7 @@ class FileMgr extends Component {
             <table className="striped highlight" style={{color:'#000'}}>
               <thead>
                 <tr>
-                  <th style={{textAlign:'right',paddingTop:"24px"}}>Select</th>
+                  <th style={{textAlign:'right'}}>Select</th>
                   <th style={{ textAlign: 'center' }}>File Name</th>
                   <th>Status</th>
                 </tr>
@@ -60,7 +60,7 @@ class FileMgr extends Component {
               <tbody >
                 {this.props.items.map((item,i)=>
                 <tr key = {i}>
-                  <td style={{textAlign:'right'}}>
+                    <td style={{ textAlign: 'right', paddingTop: "24px"}}>
                     <label>
                         <input type="checkbox" id={item.id} name={item.id} onChange={this.handleChange} checked={undefined}/>
                       <span></span>
