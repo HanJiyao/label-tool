@@ -64,6 +64,7 @@ class App extends Component {
     this.searchData = this.searchData.bind(this);
     this.clearSearch = this.clearSearch.bind(this);
     this.deleteFile = this.deleteFile.bind(this);
+    this.handleKewordChange = this.handleKewordChange.bind(this)
   }
   changeFiles(selectedFiles){
     this.setState({selectedFiles:selectedFiles})
@@ -83,6 +84,31 @@ class App extends Component {
     })
     if(this.state.keyword.length!==0) this.setState({checkDisabled:false})
   } 
+  handleKewordChange(word){
+    let titleTextList = this.state.title.split(/\W+/);
+    let i = titleTextList.indexOf(word)
+    if(this.state.keyword.find(element=>element.word===word)===undefined){
+      this.setState(prevState => ({
+        keyword: [...prevState.keyword, {key:i,word:word}]
+      }),()=>{
+        console.log(this.state.keyword)
+        if(this.state.topic!==""&&this.state.keyword.length!==0)
+        this.setState({checkDisabled:false})  
+        else
+        this.setState({checkDisabled:true})
+      })
+    } else {
+      this.setState(prevState => ({
+        keyword: prevState.keyword.filter(keyword => keyword.word !== word)
+      }),()=>{
+        console.log(this.state.keyword)
+        if(this.state.topic!==""&&this.state.keyword.length!==0)
+        this.setState({checkDisabled:false})  
+        else
+        this.setState({checkDisabled:true})  
+      })
+    }                 
+  }
   loadNewItem(){
     this.setState({dataModified:false})
     axios.get('/api/loadNewItem/'+this.state.index)
@@ -332,44 +358,17 @@ class App extends Component {
   }  
   render() {
     if(this.state.loaded){
-      let currentTopic=""
-      let titleTextList=[]
-      let description=""
-      try{
-        currentTopic = this.state.topicPrev.replace(/[["\]]/g, '');
-        titleTextList = this.state.title.split(/\W+/);
-        description = this.state.description
-      } catch {
-        currentTopic="Error: Invalid Data"
-        titleTextList=["Error: Invalid Data"]
-        description="Error: Invalid Data"
-      }
-      const titleList = titleTextList.map((word, i)=>
-        <span
-          key={i} 
-          className={(this.state.keyword.find(element=>element.word===word)!==undefined)?"selectTitle orange-text text-darken-4 active":"selectTitle"}
-          onClick={()=>{
-              if(this.state.keyword.find(element=>element.word===word)===undefined){
-                this.setState(prevState => ({
-                  keyword: [...prevState.keyword, {key:i,word:word}]
-                }),()=>{
-                  if(this.state.topic!==""&&this.state.keyword.length!==0)
-                  this.setState({checkDisabled:false})  
-                  else
-                  this.setState({checkDisabled:true})
-                })
-              } else {
-                this.setState(prevState => ({
-                  keyword: prevState.keyword.filter(keyword => keyword.word !== word)
-                }),()=>{
-                  if(this.state.topic!==""&&this.state.keyword.length!==0)
-                  this.setState({checkDisabled:false})  
-                  else
-                  this.setState({checkDisabled:true})  
-                })
-              }                 
-          }}> {word} 
-        </span>)
+      let titleHTML = this.state.title.split(/\W+/);
+      let symbol = this.state.title.split(/\w+/);
+      titleHTML = titleHTML.map((word,i)=>
+        <><span
+        key={i} onClick={()=>{
+          this.handleKewordChange(word)}}
+          className={(this.state.keyword.find(element=>element.word===word)!==undefined)?
+          "selectTitle orange-text text-darken-4 active waves-effect waves-orange waves-ripple"
+          :"selectTitle waves-effect waves-orange waves-ripple"}
+        > {word} </span> {symbol[i+1]} </>
+      )
       return (
         <div className="container">
           {!this.state.updateDone?
@@ -441,14 +440,14 @@ class App extends Component {
               </div>
               <div className="col m8 s12" style={{margin:"0"}}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
-                  <h5 id="customScroll"  className="col s12" style={{height:"4.2rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleList}</h5>
-                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{description}</h6>
+                  <h5 id="customScroll"  className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
+                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{this.state.description}</h6>
                 </div>
                 <div className="card-content" style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)"}}>
                   {(this.state.correct)?
                     <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>
-                      <h5 className="col s12 center-align" style={(currentTopic===""||currentTopic==="Cannot be determined")?{color:"red"}:null}>
-                        <strong >{currentTopic===""?"Cannot be determined":currentTopic}</strong>
+                      <h5 className="col s12 center-align" style={(this.state.topicPrev.replace(/[["\]]/g, '')===""||this.state.topicPrev.replace(/[["\]]/g, '')==="Cannot be determined")?{color:"red"}:null}>
+                        <strong >{this.state.topicPrev.replace(/[["\]]/g, '')===""?"Cannot be determined":this.state.topicPrev.replace(/[["\]]/g, '')}</strong>
                       </h5>
                     </div>
                     :

@@ -92,7 +92,8 @@ app.get('/api/initData', (req,res) => {
                 let filtered = data.filter((val)=>{
                     let diff = []
                     keywordsArr.forEach((key)=>{
-                        if(val.Title.toLowerCase().includes(key.toLowerCase()))
+                        let titleText = val.Title.toLowerCase().replace(/[\W_]+/g," ");
+                        if(titleText.includes(key.toLowerCase()))
                         diff.push(val)
                     })
                     return diff[0]
@@ -163,7 +164,8 @@ app.post('/api/filterData', function(req, res) {
     })
     queryKeyword = queryKeyword.map(item=>{return item.word}).join(" ").toLowerCase().trim()
     let queryData = data.filter((item)=>{
-        return (item.Title.toLowerCase().indexOf(queryKeyword)!==-1)
+        let titleText = item.Title.toLowerCase().replace(/[\W_]+/g," ");
+        return (titleText.indexOf(queryKeyword)!==-1)
     })
     let indexArr = queryData.map(item=>{
         return data.indexOf(item)
@@ -196,7 +198,8 @@ app.post('/api/updateData', function(req, res) {
     let filtered = data.filter((val)=>{
         let diff = []
         keywordsArr.forEach((key)=>{
-            if(val.Title.toLowerCase().includes(key.toLowerCase())){
+            let titleText = val.Title.toLowerCase().replace(/[\W_]+/g," ");
+            if(titleText.includes(key.toLowerCase())){
                 diff.push(val)
             }
         })
@@ -223,6 +226,7 @@ app.post('/api/updateData', function(req, res) {
         fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     }
+    // eslint-disable-next-line no-sequences
     keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
     res.json({
         updateDone:true,
@@ -252,6 +256,7 @@ app.post('/api/refreshData', function(req, res) {
             items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
         }
     })
+    // eslint-disable-next-line no-sequences
     keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
     const fileName=req.body.selectedFiles
     if(fileName.length!==0){
@@ -287,7 +292,8 @@ app.post('/api/refreshData', function(req, res) {
                 let filtered = data.filter((val)=>{
                     let diff = []
                     keywordsArr.forEach((key)=>{
-                        if(val.Title.toLowerCase().includes(key.toLowerCase()))
+                        let titleText = val.Title.toLowerCase().replace(/[\W_]+/g," ");
+                        if(titleText.includes(key.toLowerCase()))
                         diff.push(val)
                     })
                     return diff[0]

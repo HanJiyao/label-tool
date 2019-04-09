@@ -62,7 +62,9 @@
 }
 .selectTitle {
   transition: color 0.3s;
-  cursor:pointer
+  cursor:pointer;
+  vertical-align: -2px;
+  overflow: visible;
 }
 .selectTitle.active{
   font-weight: 500
