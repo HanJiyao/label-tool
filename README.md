@@ -1,6 +1,6 @@
 # Annotation Tool
 
-![Label Tool](./doc/logo.png | width=80)
+![Logo](./doc/logo.png | width=80)
 
 A simple tool to edit json, manual label base on title and description
 
