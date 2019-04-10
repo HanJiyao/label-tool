@@ -91,7 +91,6 @@ class App extends Component {
       this.setState(prevState => ({
         keyword: [...prevState.keyword, {key:i,word:word}]
       }),()=>{
-        console.log(this.state.keyword)
         if(this.state.topic!==""&&this.state.keyword.length!==0)
         this.setState({checkDisabled:false})  
         else
@@ -101,7 +100,6 @@ class App extends Component {
       this.setState(prevState => ({
         keyword: prevState.keyword.filter(keyword => keyword.word !== word)
       }),()=>{
-        console.log(this.state.keyword)
         if(this.state.topic!==""&&this.state.keyword.length!==0)
         this.setState({checkDisabled:false})  
         else
