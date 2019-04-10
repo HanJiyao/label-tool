@@ -441,7 +441,7 @@ class App extends Component {
                 </button>
               </div>
               <div className="col m8 s12" style={{margin:"0"}}>
-              <Swipeable onSwipeLeft={this.indexDown} onSwipeRight={this.indexUp}>
+              <Swipeable onSwipeLeft={document.getElementById("arrowDown").click()} onSwipeRight={document.getElementById("arrowUp").click()}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
                   <h5 id="customScroll"  className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
                   <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{this.state.description}</h6>
