@@ -66,10 +66,11 @@ class FileMgr extends Component {
                       <span></span>
                     </label>
                   </td>
-                  <td style={{ textAlign: 'center' }}>{item.id}</td>
+                  <td style={{ textAlign: 'center' }}>{item.label}</td>
                   <td>
                   {(this.props.selectedFiles.indexOf(item.id)!==-1)?
-                  <><i class="material-icons left green-text" style={{height: "24px",lineHeight: "32px"}}>check_circle</i>Active</>:''}
+                  <><i class="material-icons left green-text" style={{height: "24px",lineHeight: "28px"}}>check_circle</i>Active</>
+                  :<><i class="material-icons left red-text" style={{height: "24px",lineHeight: "28px"}}>remove_circle</i>Not active</>}
                   </td>
                 </tr>
                 )}

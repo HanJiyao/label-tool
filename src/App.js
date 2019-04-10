@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import  React, { Component } from 'react';
 import load from './load.svg';
 import './App.css';
@@ -13,6 +14,7 @@ import M from "materialize-css";
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 import { hot } from 'react-hot-loader'
+import { Swipeable  } from 'react-touch';
 registerPlugin();
 
 class App extends Component {
@@ -213,7 +215,8 @@ class App extends Component {
       index:this.state.index,
       topic:this.state.topicValue,
       newKeyword:this.state.newKeyword,
-      keywordsJson:this.state.keywordsJson
+      keywordsJson:this.state.keywordsJson,
+      queryData:this.state.queryData,
     }).then(res=>{
       let topic = res.data.topic
       this.setState({
@@ -329,6 +332,7 @@ class App extends Component {
         case 89: document.getElementById("yesBtn").click();break;
         case 78: document.getElementById("noBtn").click();break;
         case 67: document.getElementById("checkBtn").click();break;
+        case 70: document.getElementById("search").focus();break;
         case 13: this.selectRef.focus();break;
         default: break;
       }
@@ -344,7 +348,7 @@ class App extends Component {
       this.setState({
         selectedFiles: [...this.state.selectedFiles, this.state.files[0].name]
       },()=>{
-        if (e.detail.file.filename==='topics_keywords_latest.json'||e.detail.file.filename==='all_items_Merged.json') 
+        if (e.detail.file.filename==='all_items_Merged.json') 
         this.initData()
         else this.refreshData()
       })
@@ -370,10 +374,10 @@ class App extends Component {
       return (
         <div className="container">
           {!this.state.updateDone?
-          <div style={{width:'100vw',height:'100vh',position:"absolute",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
+          <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
             <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
           </div>:<></>}
-          <div className="card" style={{textAlign:"center",paddingBottom:"1rem"}} >
+          <div className="card" style={{textAlign:"center",marginBottom:"0"}} >
             <nav class="nav-extended orange">
               <div class="nav-wrapper orange">
                 <form style={{height:"64px"}} onSubmit={(e)=>{
@@ -393,10 +397,10 @@ class App extends Component {
                   </div>
                 </form>
                 <ul style={{position:"absolute",top:"0",right:"0"}}>
+                  <li className="hide-on-med-and-up"><a className="modal-trigger" data-target="editorModal"><i className="material-icons" style={{paddingTop: "3.6px"}}>edit</i></a></li>
                   <li><FileMgr items = {this.state.items} selectedFiles = {this.state.selectedFiles} deleteFile = {this.deleteFile} /></li>
                   <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
-                  <li><a href="/"><i class="material-icons" style={{paddingTop: "3.6px"}}>refresh</i></a></li>
-                  <li><a href="#!" style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
+                  <li><a style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
                 </ul>
               </div>
               <div class="nav-content">
@@ -427,7 +431,7 @@ class App extends Component {
                 />    
               </div>
             </nav>
-            <div id="cardContent" className="row valign-wrapper" style={{width:"100%",marginTop:"2rem",padding:"0 24px"}}>
+            <div id="cardContent" className="row valign-wrapper" style={{width:"100%",marginTop:"1rem",paddingBottom:".5rem", marginBottom:".3rem"}}>
               <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                 <button id="arrowDown" 
                   onClick={this.indexDown} 
@@ -437,10 +441,12 @@ class App extends Component {
                 </button>
               </div>
               <div className="col m8 s12" style={{margin:"0"}}>
+              <Swipeable onSwipeLeft={this.indexDown} onSwipeRight={this.indexUp}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
                   <h5 id="customScroll"  className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
                   <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{this.state.description}</h6>
                 </div>
+              </Swipeable>
                 <div className="card-content" style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)"}}>
                   {(this.state.correct)?
                     <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>

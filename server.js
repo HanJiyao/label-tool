@@ -61,7 +61,7 @@ app.get('/api/initData', (req,res) => {
     let options=[]
     let ordered = {};
     let keywordsJson = {};
-    Object.keys(topicJson).sort().forEach(function(key) {
+    Object.keys(topicJson).sort(Intl.Collator().compare).forEach(function(key) {
         ordered[key] = topicJson[key];
     })
     for (var key in ordered) {
@@ -89,20 +89,16 @@ app.get('/api/initData', (req,res) => {
             if ((data.length === selectedFiles.length)){
                 data = [].concat.apply([], data)
                 console.log("total items: ", data.length)
-                let filtered = data.filter((val)=>{
-                    let diff = []
-                    keywordsArr.forEach((key)=>{
-                        let titleText = val.Title.toLowerCase().replace(/[\W_]+/g," ");
-                        if(titleText.includes(key.toLowerCase()))
-                        diff.push(val)
-                    })
-                    return diff[0]
-                })
-                displayedData = data.filter(function(obj) {
-                    return !filtered.some(function(obj2) {
-                        return (obj.Title===obj2.Title&&obj.Description===obj2.Description);
-                    });
-                })
+                let filtered = []
+                keywordsArr.map(key=>
+                    filtered.push(
+                        data.filter(
+                            item=>item.Title.toLowerCase().replace(/[\W_]+/g," ").indexOf(key.toLowerCase())>-1
+                        )
+                    )
+                )
+                filtered = [].concat.apply([], filtered);
+                let displayedData = data.filter(obj=>!filtered.some(obj2=>obj.Title===obj2.Title))
                 console.log("display items: ", displayedData.length)
                 fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
                 fs.writeFileSync('./data/selected_files.json', JSON.stringify(selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
@@ -183,35 +179,12 @@ app.post('/api/updateData', function(req, res) {
     const data = require('./data/all_items_Merged.json')
     let topicJson = require('./data/topics_keywords_latest.json')
     const index = req.body.index
-    let keywordsJson = {}
-    let keywordsArr = []
     const newKeyword = req.body.newKeyword
-    if (newKeyword===""){
-        keywordsArr = [].concat.apply([],Object.values(req.body.keywordsJson))
-    }else{
-        keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
-        keywordsArr.push(newKeyword)
-    }
-    keywordsArr = keywordsArr.filter(function (el) {
-        return el !== "";
-    });
-    let filtered = data.filter((val)=>{
-        let diff = []
-        keywordsArr.forEach((key)=>{
-            let titleText = val.Title.toLowerCase().replace(/[\W_]+/g," ");
-            if(titleText.includes(key.toLowerCase())){
-                diff.push(val)
-            }
-        })
-        return diff[0]
-    })
+    let filtered = req.body.queryData
     console.log("filtered items: ",filtered.length)
-    let displayedData = data.filter(function(obj) {
-        return !filtered.some(function(obj2) {
-            return (obj.Title===obj2.Title&&obj.Description===obj2.Description);
-        });
-    })
+    let displayedData = data.filter(obj=>!filtered.some(obj2=>obj.Title===obj2.Title))
     console.log("display items: ",displayedData.length)
+    let keywordsJson = {}
     if(!(req.body.topic===null)){
         topicJson[req.body.topic].keywords.push(newKeyword)
     } else {
@@ -239,6 +212,7 @@ app.post('/api/updateData', function(req, res) {
         keywordsJson: keywordsJson
     })
 }); 
+
 app.post('/api/refreshData', function(req, res) {
     const files = fs.readdirSync('./data')
     let topicJson = require('./data/topics_keywords_latest.json')
@@ -258,14 +232,14 @@ app.post('/api/refreshData', function(req, res) {
     })
     // eslint-disable-next-line no-sequences
     keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
-    const fileName=req.body.selectedFiles
-    if(fileName.length!==0){
+    const selectedFiles=req.body.selectedFiles
+    if(selectedFiles.length!==0){
         for(var k in topicJson){topicJson[k].keywords = req.body.keywordsJson[k]}
         const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
         let options=[]
         let ordered = {};
         const index = req.body.index
-        Object.keys(topicJson).sort().forEach(function(key) {
+        Object.keys(topicJson).sort(Intl.Collator().compare).forEach(function(key) {
             ordered[key] = topicJson[key];
         })
         for (var key in ordered) {
@@ -276,8 +250,8 @@ app.post('/api/refreshData', function(req, res) {
         }
         var data = []
         var displayedData = []
-        for (var i = 0; i < fileName.length; i++){
-            var csvFilePath = fs.readFileSync("./data/"+fileName[i], "utf8"); 
+        for (var i = 0; i < selectedFiles.length; i++){
+            var csvFilePath = fs.readFileSync("./data/"+selectedFiles[i], "utf8"); 
             Papa.parse(csvFilePath, {
                 header: true,
                 skipEmptyLines: true,
@@ -286,29 +260,25 @@ app.post('/api/refreshData', function(req, res) {
         }
         function initData(results){
             data.push(results.data);
-            if ((data.length === fileName.length)){
+            if ((data.length === selectedFiles.length)){
                 data = [].concat.apply([], data)
                 console.log("total items: ", data.length)
-                let filtered = data.filter((val)=>{
-                    let diff = []
-                    keywordsArr.forEach((key)=>{
-                        let titleText = val.Title.toLowerCase().replace(/[\W_]+/g," ");
-                        if(titleText.includes(key.toLowerCase()))
-                        diff.push(val)
-                    })
-                    return diff[0]
-                })
-                displayedData = data.filter(function(obj) {
-                    return !filtered.some(function(obj2) {
-                        return (obj.Title===obj2.Title&&obj.Description===obj2.Description);
-                    });
-                })
+                let filtered = []
+                keywordsArr.map(key=>
+                    filtered.push(
+                        data.filter(
+                            item=>item.Title.toLowerCase().replace(/[\W_]+/g," ").indexOf(key.toLowerCase())>-1
+                        )
+                    )
+                )
+                filtered = [].concat.apply([], filtered);
+                displayedData = data.filter(obj=>!filtered.some(obj2=>obj.Title===obj2.Title))
                 console.log("display items: ", displayedData.length)
                 fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
             } 
         }
         fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
-        fs.writeFileSync('./data/selected_files.json', JSON.stringify(fileName) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        fs.writeFileSync('./data/selected_files.json', JSON.stringify(selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         res.json({
             items:items,
             updateDone:true,
@@ -336,8 +306,6 @@ app.post('/api/refreshData', function(req, res) {
 })
 
 app.post('/api/deleteFile', (req, res) => {
-    console.log(req.body.deleteFiles)
-    console.log(req.body.selectedFiles)
     for (var i in req.body.deleteFiles){
         if (req.body.deleteFiles[i].status) fs.unlinkSync('./data/' + req.body.deleteFiles[i].file)
     }

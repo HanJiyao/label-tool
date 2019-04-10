@@ -41,6 +41,7 @@
     "react-scripts": "^2.1.8",
     "react-select": "^2.4.2",
     "react-string-replace": "^0.4.2",
+    "react-touch": "^0.4.4",
     "style-loader": "^0.23.1",
     "typescript": "^3.4.2",
     "webpack-dev-middleware": "^3.6.2",
