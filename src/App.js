@@ -174,7 +174,7 @@ class App extends Component {
     }
   }
   indexDown(){
-    if(this.state.index>=0){
+    if(this.state.index>0){
       this.setState({arrowDisabledLeft:true})
       if(!this.state.dataModified){
         this.setState({index: this.state.index-1},()=>this.loadNewItem())
@@ -377,7 +377,7 @@ class App extends Component {
           <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
             <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
           </div>:<></>}
-          <div className="card" style={{textAlign:"center",marginBottom:"0"}} >
+          <div className="card" style={{textAlign:"center",marginTop:"1rem",marginBottom:"0"}} >
             <nav class="nav-extended orange">
               <div class="nav-wrapper orange">
                 <form style={{height:"64px"}} onSubmit={(e)=>{
@@ -390,7 +390,7 @@ class App extends Component {
                   this.setState({checkDisabled:false,keyword:searchList},()=>document.getElementById("checkBtn").click())
                 }}>
                   <div class="input-field orange">
-                    <input id="search" type="search" value={this.state.keywordSearch} 
+                    <input autocomplete="off" required id="search" type="search" value={this.state.keywordSearch} 
                       onChange={(e)=>this.setState({keywordSearch:e.target.value})} 
                     />
                     <label class="label-icon" for="search"><i class="material-icons" style={{lineHeight:"64px"}}>search</i></label>
@@ -441,9 +441,9 @@ class App extends Component {
                 </button>
               </div>
               <div className="col m8 s12" style={{margin:"0"}}>
-              <Swipeable onSwipeLeft={document.getElementById("arrowDown").click()} onSwipeRight={document.getElementById("arrowUp").click()}>
+              <Swipeable onSwipeLeft={this.indexUp} onSwipeRight={this.indexDown}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
-                  <h5 id="customScroll"  className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
+                  <h5 id="customScroll" className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
                   <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{this.state.description}</h6>
                 </div>
               </Swipeable>

@@ -75,7 +75,7 @@ class Modal extends Component {
               <strong>{this.props.newKeyword} <i className="material-icons" style={{verticalAlign:"-0.2rem"}}>keyboard_arrow_right</i> {this.props.topic}</strong>
             </button>
             <button type="submit" className="modal-close waves-effect waves blue btn" 
-              onClick = {this.props.jsonUpdate}>
+                  onClick={this.props.jsonUpdate} style={{borderRadius:'100px'}}>
               <i class="material-icons left">
                 add
               </i> Add

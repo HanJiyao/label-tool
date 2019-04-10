@@ -81,7 +81,7 @@ class FileMgr extends Component {
             <button className="modal-close waves-effect waves red btn" 
               onClick = {()=>{
                 this.props.deleteFile(this.state.files)
-              }}>
+              }} style={{borderRadius:'100px'}}>
               <i class="material-icons left" style={{lineHeight:"1.5"}}>
                 delete
               </i> Delete

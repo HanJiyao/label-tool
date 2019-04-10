@@ -26,7 +26,7 @@ class Editor extends Component {
       <>
         <button
           data-target="editorModal"
-          className="btn-floating btn-large halfway-fab waves-effect waves-light teal deep-orange modal-trigger hide-on-small-only" >
+          className="btn-floating btn-large halfway-fab waves-effect waves-light teal deep-orange modal-trigger z-depth-3 hide-on-small-only" >
           <i className="material-icons left">edit</i>
         </button>
         <div
@@ -45,7 +45,7 @@ class Editor extends Component {
             :<h5 className="center-align white-text">Loading...</h5>}
           </div>
           <div className="modal-footer" style={{background:"rgb(29, 31, 33)"}}>
-            <button type="submit" className="modal-close waves-effect waves btn" style={{background:"rgb(57, 113, 237)"}} onClick={this.props.jsonUpdateRefresh}>
+            <button type="submit" className="modal-close waves-effect waves btn" style={{ background: "rgb(57, 113, 237)", borderRadius: '100px'}} onClick={this.props.jsonUpdateRefresh}>
               <i className="material-icons left" style={{lineHeight:"1.5"}}>
                 save
               </i> save
