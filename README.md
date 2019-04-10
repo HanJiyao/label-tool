@@ -1,6 +1,6 @@
 # Annotation Tool
 
-![Logo](./doc/logo.png | width=80)
+<img src="./doc/logo.png" width="80">
 
 A simple tool to edit json, manual label base on title and description
 
