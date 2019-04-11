@@ -14,7 +14,8 @@ import M from "materialize-css";
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 import { hot } from 'react-hot-loader'
-import { Swipeable  } from 'react-touch';
+// eslint-disable-next-line no-unused-vars
+import { useSwipeable, Swipeable } from 'react-swipeable'
 registerPlugin();
 
 class App extends Component {
@@ -441,7 +442,7 @@ class App extends Component {
                 </button>
               </div>
               <div className="col m8 s12" style={{margin:"0"}}>
-              <Swipeable onSwipeLeft={this.indexUp} onSwipeRight={this.indexDown}>
+              <Swipeable onSwipedLeft={this.indexUp} onSwipedRight={this.indexDown}>
                 <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
                   <h5 id="customScroll" className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
                   <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{this.state.description}</h6>
