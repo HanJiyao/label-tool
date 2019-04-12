@@ -222,23 +222,32 @@ app.post('/api/refreshData', function(req, res) {
             keywordsJson[x] = topicJson[x].keywords
         }
     }
-    let fileNameList = []
     let items = []
     files.forEach(function (file) {
         if(path.extname('./data'+file)===".csv"){
-            fileNameList.push(file)
             items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
         }
     })
     // eslint-disable-next-line no-sequences
     keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
     const selectedFiles=req.body.selectedFiles
-    if(selectedFiles.length!==0){
+    var existSelectedFiles = []
+    var same = true
+    try{
+        existSelectedFiles=require("./data/selected_files.json")
+        for (var file in existSelectedFiles){
+            if(selectedFiles[file]!==existSelectedFiles[file])
+            same = false
+        }
+    } catch {
+        same=false
+    }
+    const index = req.body.index
+    if((selectedFiles.length!==0&&!same)||req.body.addFile){
         for(var k in topicJson){topicJson[k].keywords = req.body.keywordsJson[k]}
         const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
         let options=[]
         let ordered = {};
-        const index = req.body.index
         Object.keys(topicJson).sort(Intl.Collator().compare).forEach(function(key) {
             ordered[key] = topicJson[key];
         })
@@ -267,7 +276,15 @@ app.post('/api/refreshData', function(req, res) {
                 keywordsArr.map(key=>
                     filtered.push(
                         data.filter(
-                            item=>item.Title.toLowerCase().replace(/[\W_]+/g," ").indexOf(key.toLowerCase())>-1
+                            item=>{
+                                if(item.Title!==undefined){
+                                    let titleText = item.Title.toLowerCase().replace(/[\W_]+/g," ")
+                                    return titleText.indexOf(key.toLowerCase())>-1
+                                } else {
+                                    return undefined
+                                }
+                            }
+                                
                         )
                     )
                 )
@@ -291,17 +308,32 @@ app.post('/api/refreshData', function(req, res) {
             keywordsJson: keywordsJson
         });
     } else {
-        res.json({
-            items:items,
-            updateDone:true,
-            dataLength: 0,
-            title: "No data loaded",
-            description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
-            topicPrev: "",
-            topic: "",
-            correct: false,
-            keywordsJson: keywordsJson
-        });
+        if(same){
+            displayedData = require('./data/all_items_Merged.json')
+            res.json({
+                items:items,
+                updateDone:true,
+                dataLength: displayedData.length,
+                title: displayedData[index].Title,
+                description: displayedData[index].Description,
+                topicPrev: displayedData[index].Topic,
+                topic: displayedData[index].TopicModified===undefined?"":displayedData[index].TopicModified,
+                correct: displayedData[index].Correct===0?false:(displayedData[index].Correct===undefined?false:true),
+                keywordsJson: keywordsJson
+            });
+        } else {
+            res.json({
+                items:items,
+                updateDone:true,
+                dataLength: 0,
+                title: "No data loaded",
+                description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
+                topicPrev: "",
+                topic: "",
+                correct: false,
+                keywordsJson: keywordsJson
+            });
+        }
     }
 })
 

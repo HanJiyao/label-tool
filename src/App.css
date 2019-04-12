@@ -19,6 +19,9 @@
 .App-link {
   color: #61dafb;
 }
+body {
+  overflow: auto!important
+}
 .container{
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
 }
@@ -30,29 +33,11 @@
     transform: rotate(360deg);
   }
 }
-#customScroll::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-  background-color: #fff;
-  visibility: hidden;
-} 
-#customScroll::-webkit-scrollbar:focus{
-  visibility: 1;
+.customScroll::-webkit-scrollbar { 
+  display: none; 
 }
-#customScroll::-webkit-scrollbar-thumb {
-  background-color: #bdbdbd;
-}
-#jsonEditor::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background-color: none;
-  visibility: hidden;
-} 
-#jsonEditor::-webkit-scrollbar:focus{
-  visibility: 1;
-}
-#jsonEditor::-webkit-scrollbar-thumb {
-  background-color: #e0e0e0;
+.customScroll div:nth-child(2) {
+  display: none;
 }
 .react-select__input,.react-select__single-value{
   font-size: 16px;
@@ -90,7 +75,6 @@
 .input-field label {
   color: rgba(255,255,255,0.7);
 }
-/* label focus color */
 .input-field input[type=search] {
   color: #fff;
 }
@@ -110,7 +94,6 @@
   border-bottom: 1px solid #fff!important;
   box-shadow: 0 1px 0 0 #fff!important;
 }
-/* icon prefix focus color */
 .input-field .prefix.active {
   color: #fff;
 }
@@ -130,6 +113,10 @@
   border-right: 3px solid red;
   border-bottom: 3px solid red;
 }
+.react-select__control{
+  border-radius: 100px!important
+}
+
 @media only screen and (max-width: 1000px) {
   #checkBtn{
     margin:1.5rem 0
@@ -153,13 +140,16 @@
   .statusCol{
     width: 200px
   }
+  .fileSelectCol{
+    width:160px
+  }
 }
 @media only screen and (max-width: 600px) {
   #editorModal{
     width: 100%
   }
   #cardContent{
-    height: calc(100vh - 150px);
+    height: 100vh;
   }
   .container{
     width:100%!important
@@ -169,5 +159,9 @@
   }
   .card {
     margin: 0!important
+  }
+  .valign-wrapper.content-wrapper {
+    height: calc(100vh - 150px);
+    min-height:500px
   }
 }

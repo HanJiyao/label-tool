@@ -60,7 +60,7 @@ class FileMgr extends Component {
               <tbody >
                 {this.props.items.map((item,i)=>
                 <tr key = {i}>
-                    <td style={{ textAlign: 'right', paddingTop: "24px"}}>
+                    <td className="fileSelectCol" style={{ textAlign: 'right', paddingTop: "24px"}}>
                     <label>
                         <input type="checkbox" id={item.id} name={item.id} onChange={this.handleChange} checked={undefined}/>
                       <span></span>

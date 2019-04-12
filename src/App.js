@@ -14,9 +14,13 @@ import M from "materialize-css";
 import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 import { hot } from 'react-hot-loader'
-// eslint-disable-next-line no-unused-vars
-import { useSwipeable, Swipeable } from 'react-swipeable'
+import SwipeableViews from 'react-swipeable-views'
+import virtualize from 'react-swipeable-views-utils/lib/virtualize'
+import { Scrollbars } from 'react-custom-scrollbars';
+import { Swipeable } from 'react-swipeable'
 registerPlugin();
+
+const EnhancedSwipeableViews = virtualize(SwipeableViews)
 
 class App extends Component {
   constructor(props) {
@@ -47,6 +51,8 @@ class App extends Component {
       dataModified:false,
       arrowDisabledRight:false,
       arrowDisabledLeft:false,
+      swipeIndex:0,
+      animation:true,
     };
     this.handleTopicChange = this.handleTopicChange.bind(this);
     this.setCorrect = this.setCorrect.bind(this);
@@ -67,7 +73,7 @@ class App extends Component {
     this.searchData = this.searchData.bind(this);
     this.clearSearch = this.clearSearch.bind(this);
     this.deleteFile = this.deleteFile.bind(this);
-    this.handleKewordChange = this.handleKewordChange.bind(this)
+    this.handleKewordChange = this.handleKewordChange.bind(this);
   }
   changeFiles(selectedFiles){
     this.setState({selectedFiles:selectedFiles})
@@ -132,6 +138,11 @@ class App extends Component {
     })
     .catch(err=>console.log(err))
   }
+  handleChangeIndex = (index, indexLatest) => {
+    if(indexLatest>index) this.indexDown()
+    else this.indexUp()
+    this.setState({swipeIndex: index})
+  };
   indexSearch(event){
     var index = parseInt(event.target.value)
     if(index>this.state.dataLength-1 ){
@@ -159,7 +170,7 @@ class App extends Component {
     if(this.state.index<this.state.dataLength-1){
       this.setState({arrowDisabledRight:true})
       if(!this.state.dataModified){
-        this.setState({index: this.state.index+1},()=>this.loadNewItem())
+        this.setState({index: this.state.index+1,swipeIndex: this.state.swipeIndex+1},()=>this.loadNewItem())
       } else {
         axios.post('/api/updateItem',{
           index:this.state.index,
@@ -167,7 +178,7 @@ class App extends Component {
           topicModified:this.state.topic
         }).then((res)=>{
           if(res.data.updateDone){
-            this.setState({index: this.state.index+1},()=>this.loadNewItem())
+            this.setState({index: this.state.index+1,swipeIndex: this.state.swipeIndex+1},()=>this.loadNewItem())
           }
         })
         .catch(err=>console.log(err))
@@ -178,7 +189,7 @@ class App extends Component {
     if(this.state.index>0){
       this.setState({arrowDisabledLeft:true})
       if(!this.state.dataModified){
-        this.setState({index: this.state.index-1},()=>this.loadNewItem())
+        this.setState({index: this.state.index-1,swipeIndex: this.state.swipeIndex-1},()=>this.loadNewItem())
       } else {
         axios.post('/api/updateItem',{
           index:this.state.index,
@@ -186,7 +197,7 @@ class App extends Component {
           topicModified:this.state.topic
         }).then((res)=>{
           if(res.data.updateDone){
-            this.setState({index: this.state.index-1},()=>this.loadNewItem())
+            this.setState({index: this.state.index-1,swipeIndex: this.state.swipeIndex-1},()=>this.loadNewItem())
           }
         })
         .catch(err=>console.log(err))
@@ -264,7 +275,7 @@ class App extends Component {
       this.setState({loaded:true,updateDone:true})
     })
   }
-  refreshData(){
+  refreshData(addFile=false){
     this.clearKeywords()
     this.setState({
       updateDone:false,
@@ -274,7 +285,8 @@ class App extends Component {
     axios.post('/api/refreshData',{
       index:this.state.index,
       selectedFiles:this.state.selectedFiles,
-      keywordsJson:this.state.keywordsJson
+      keywordsJson:this.state.keywordsJson,
+      addFile:addFile
     }).then(res=>{
       let topic = res.data.topic
       this.setState({
@@ -351,7 +363,7 @@ class App extends Component {
       },()=>{
         if (e.detail.file.filename==='all_items_Merged.json') 
         this.initData()
-        else this.refreshData()
+        else this.refreshData(true)
       })
     });
     document.addEventListener("keydown", this.keyFunction, false);
@@ -372,13 +384,25 @@ class App extends Component {
           :"selectTitle waves-effect waves-orange waves-ripple"}
         > {word} </span> {symbol[i+1]} </>
       )
+      let slideRenderer = ({ key, index }) => (
+        <div key={index}>
+            <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
+                <Scrollbars autoHide className="customScroll" style={{height: 80, margin:"1.5rem 0 .5rem", padding:"0 .75rem",overflowX:"hidden",overflowY:"scroll"}}>
+                    <p style={{fontSize:"1.8rem",padding:"0 .75rem"}}>{titleHTML}</p>
+                </Scrollbars>
+                <Scrollbars autoHide className="customScroll" style={{height: 87, margin:".1rem 0", padding:"0 .75rem",overflowX:"hidden",overflowY:"scroll"}}>
+                    <p style={{wordBrea:"break-word",padding:"0 .75rem"}}>{this.state.description}</p>
+                </Scrollbars>
+            </div>
+        </div>
+      )
       return (
         <div className="container">
           {!this.state.updateDone?
           <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
             <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
           </div>:<></>}
-          <div className="card" style={{textAlign:"center",marginTop:"1rem",marginBottom:"0"}} >
+          <div  id="cardContent" className="card" style={{textAlign:"center",marginTop:".5rem",marginBottom:"3px"}} >
             <nav class="nav-extended orange">
               <div class="nav-wrapper orange">
                 <form style={{height:"64px"}} onSubmit={(e)=>{
@@ -400,6 +424,10 @@ class App extends Component {
                 <ul style={{position:"absolute",top:"0",right:"0"}}>
                   <li className="hide-on-med-and-up"><a className="modal-trigger" data-target="editorModal"><i className="material-icons" style={{paddingTop: "3.6px"}}>edit</i></a></li>
                   <li><FileMgr items = {this.state.items} selectedFiles = {this.state.selectedFiles} deleteFile = {this.deleteFile} /></li>
+                  <li>
+                      {(this.state.animation)?<a style={{paddingTop: "3.6px"}} onClick={()=>this.setState({animation:false})}><i class="material-icons">cancel_presentation</i></a>
+                      :<a style={{paddingTop: "3.6px"}} onClick={()=>this.setState({animation:true})}><i class="material-icons">input</i></a>}
+                  </li>
                   <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
                   <li><a style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
                 </ul>
@@ -407,7 +435,9 @@ class App extends Component {
               <div class="nav-content">
                 <div className="row" style={{margin:"0",padding:"30px 8px 0 8px"}}>
                   <div className="input-field col s3 m2">
-                    <input style={{color:"white"}} type="number" id="index" value={this.state.index} onChange={this.indexSearch}/>
+                    <input style={{color:"white"}} type="number" id="index" 
+                      value={this.state.index} 
+                      onChange={(e)=>{this.indexSearch(e)}}/>
                     <label htmlFor="index" className="active" style={{fontSize:"1.2rem"}}>{this.state.index}/{this.state.dataLength-1}</label>
                   </div>
                   <MSelect 
@@ -432,23 +462,41 @@ class App extends Component {
                 />    
               </div>
             </nav>
-            <div id="cardContent" className="row valign-wrapper" style={{width:"100%",marginTop:"1rem",paddingBottom:".5rem", marginBottom:".3rem"}}>
-              <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
-                <button id="arrowDown" 
-                  onClick={this.indexDown} 
-                  disabled={(this.state.index===0||this.state.arrowDisabledLeft)?'disabled': null} 
-                  className=" btn-floating btn-large waves-effect waves-light deep-orange">
-                    <i style={{fontSize:"3rem",margin:"0"}} className="material-icons">keyboard_arrow_left</i>
-                </button>
-              </div>
-              <div className="col m8 s12" style={{margin:"0"}}>
-              <Swipeable onSwipedLeft={this.indexUp} onSwipedRight={this.indexDown}>
-                <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
-                  <h5 id="customScroll" className="col s12" style={{height:"4.5rem",overflowY:"scroll",fontSize:"1.8rem"}}>{titleHTML}</h5>
-                  <h6 id="customScroll" className="col s12" style={{height:"7.5rem",overflowY:"scroll",wordBrea:"break-word"}}>{this.state.description}</h6>
+            <div className="valign-wrapper content-wrapper">
+              <div style={{width:"100%"}}>
+                <div className="row valign-wrapper" style={{width:"100%",marginTop:"1rem",paddingBottom:".5rem", marginBottom:".3rem"}}>
+                  <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
+                      <button id="arrowDown" 
+                          onClick={this.indexDown}
+                          disabled={(this.state.index===0||this.state.arrowDisabledLeft)?'disabled': null} 
+                          className="btn-floating btn-flat btn-large waves-effect white">
+                          <i style={{fontSize:"3rem",margin:"0",color:"#bdbdbd"}} className="material-icons">keyboard_arrow_left</i>
+                      </button>
+                  </div>
+                  <div className="col m8 s12" style={{margin:"0"}}>
+                      {(this.state.animation)?
+                      <EnhancedSwipeableViews
+                          index={this.state.swipeIndex}
+                          onChangeIndex={this.handleChangeIndex}
+                          slideRenderer={slideRenderer}
+                          enableMouseEvents={true}
+                      />
+                    :<Swipeable onSwipedLeft={this.indexUp} onSwipedRight={this.indexDown}>
+                        {slideRenderer(this.state.index)}
+                    </Swipeable>}
+                  </div>
+                  <div className="col m2 hide-on-small-only" style={{color:"white"}}>
+                      <button id="arrowUp" 
+                          onClick={this.indexUp}
+                          disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
+                          className="btn-floating btn-flat btn-large waves-effect white">
+                          <i style={{fontSize:"3rem",margin:"0",color:"#bdbdbd"}} className="material-icons">keyboard_arrow_right</i>
+                      </button>
+                  </div>
                 </div>
-              </Swipeable>
-                <div className="card-content" style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)"}}>
+                <div className="card-content row" style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)",margin:"0"}}>
+                  <div className="col s2 hide-on-small"></div>
+                  <div className="col s12 m8">
                   {(this.state.correct)?
                     <div className="row currentTopic valign-wrapper" style={{paddingTop:"2rem",margin:"0",height:"85px"}}>
                       <h5 className="col s12 center-align" style={(this.state.topicPrev.replace(/[["\]]/g, '')===""||this.state.topicPrev.replace(/[["\]]/g, '')==="Cannot be determined")?{color:"red"}:null}>
@@ -466,9 +514,6 @@ class App extends Component {
                           value={this.state.selectedOption}
                           options={this.state.options} 
                           onChange={this.handleTopicChange}
-                          theme={(theme) => ({
-                            ...theme,
-                            borderRadius: '10px'})}
                         />
                       </div>
                       <div className="col s12 l6">
@@ -483,33 +528,26 @@ class App extends Component {
                           clearSearch = {this.clearSearch}
                         />
                       </div>
-                    </div>
-                  }
-                  <div className="row" style={{paddingTop:"1.5rem",margin:"0",}}>
-                    <div className="col s6">
-                      <button id="yesBtn"
-                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
-                        className={this.state.correct ? 'waves-effect waves-light btn-large green': 'waves-effect waves-light btn-large grey'} 
-                        onClick={this.setCorrect}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">check</i>yes
-                      </button>
-                    </div>
-                    <div className="col s6">
-                      <button id="noBtn"
-                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
-                        className={this.state.correct ? 'waves-effect waves-light btn-large grey': 'waves-effect waves-light btn-large red'} 
-                        onClick={this.setFalse}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">clear</i>no
-                      </button>
+                    </div>}
+                    <div className="row" style={{paddingTop:"1.5rem",margin:"0",}}>
+                      <div className="col s6">
+                        <button id="yesBtn"
+                          style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
+                          className={this.state.correct ? 'waves-effect waves-light btn-large green': 'waves-effect waves-light btn-large grey'} 
+                          onClick={this.setCorrect}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">check</i>yes
+                        </button>
+                      </div>
+                      <div className="col s6">
+                        <button id="noBtn"
+                          style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.5rem",fontWeight:"600"}} 
+                          className={this.state.correct ? 'waves-effect waves-light btn-large grey': 'waves-effect waves-light btn-large red'} 
+                          onClick={this.setFalse}><i style={{fontSize:"2rem",fontWeight:"900",margin:"0"}} className="material-icons left">clear</i>no
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  <div className="col s2 hide-on-small"></div>
                 </div>
-              </div>
-              <div className="col m2 hide-on-small-only" style={{color:"white"}}>
-                <button id="arrowUp" 
-                  onClick={this.indexUp} 
-                  disabled={this.state.index===this.state.dataLength-1||this.state.arrowDisabledRight?'disabled' : null} 
-                  className="btn-floating btn-large waves-effect waves-light deep-orange">
-                    <i style={{fontSize:"3rem",margin:"0"}} className=" material-icons">keyboard_arrow_right</i>
-                </button>
               </div>
             </div>
           </div>    
