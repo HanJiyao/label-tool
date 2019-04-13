@@ -21,14 +21,14 @@ import { Swipeable } from 'react-swipeable'
 registerPlugin();
 
 const EnhancedSwipeableViews = virtualize(SwipeableViews)
+const XRegExp = require('xregexp');
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loaded:false,
       allFiles:[],
-      selectedFiles:[],
+      selectedFiles:null,
       dataLength:0,
       queryData:[],
       title:'',
@@ -53,6 +53,7 @@ class App extends Component {
       arrowDisabledLeft:false,
       swipeIndex:0,
       animation:true,
+      characterSpace:' '
     };
     this.handleTopicChange = this.handleTopicChange.bind(this);
     this.setCorrect = this.setCorrect.bind(this);
@@ -64,7 +65,6 @@ class App extends Component {
     this.loadNewItem = this.loadNewItem.bind(this);
     this.selectRef=React.createRef();
     this.jsonUpdate = this.jsonUpdate.bind(this);
-    this.initData = this.initData.bind(this)
     this.filterData = this.filterData.bind(this);
     this.editJson = this.editJson.bind(this);
     this.refreshData = this.refreshData.bind(this);
@@ -94,7 +94,10 @@ class App extends Component {
     if(this.state.keyword.length!==0) this.setState({checkDisabled:false})
   } 
   handleKewordChange(word){
-    let titleTextList = this.state.title.split(/\W+/);
+    var titleTextList
+    if(this.state.characterSpace===' ')
+    titleTextList = this.state.title.split(/\W+/);
+    else titleTextList = this.state.title.split('');
     let i = titleTextList.indexOf(word)
     if(this.state.keyword.find(element=>element.word===word)===undefined){
       this.setState(prevState => ({
@@ -133,7 +136,8 @@ class App extends Component {
         keyword:[],
         checkDisabled:true,
         arrowDisabledLeft:false,
-        arrowDisabledRight:false
+        arrowDisabledRight:false,
+        characterSpace:res.data.characterSpace
       })
     })
     .catch(err=>console.log(err))
@@ -205,15 +209,20 @@ class App extends Component {
     }
   }
   searchData(index){
-    this.setState({index:index},()=>this.loadNewItem())
+    this.setState({ index: index, keyword: [], keywordSearch: '', checkDisabled: true},()=>this.loadNewItem())
   }
   clearSearch(){
     this.setState({keyword:[],keywordSearch:'',checkDisabled:true})
   }
   filterData(){
-    axios.post('/api/filterData',{keywords:this.state.keyword})
+    axios.post('/api/filterData',{
+      keywords:this.state.keyword,
+      characterSpace:this.state.characterSpace
+    })
       .then(res=>{
-        this.setState({newKeyword:res.data.queryKeyword, queryData:res.data.queryData})
+        this.setState({
+          newKeyword:res.data.queryKeyword, 
+          queryData:res.data.queryData})
       })
       .catch(err=>console.log(err))
   }
@@ -255,27 +264,7 @@ class App extends Component {
   clearKeywords(){
     this.setState({newKeyword:'',keyword:[],checkDisabled:true})
   }
-  initData(){
-    this.setState({updateDone:false})
-    fetch('/api/initData')
-    .then(res => res.json())
-    .then(result => {
-      this.setState({
-        dataLength:result.dataLength,
-        items:result.items,
-        options:result.options,
-        loaded:true,
-        keywordsJson:result.keywordsJson,
-        allFiles:result.file,
-        selectedFiles:result.selectedFiles,
-        files:null
-      })
-    }).then(()=>{
-      this.loadNewItem()
-      this.setState({loaded:true,updateDone:true})
-    })
-  }
-  refreshData(addFile=false){
+  refreshData(initFile=false,addFile=false,forceUpdate=false){
     this.clearKeywords()
     this.setState({
       updateDone:false,
@@ -286,18 +275,23 @@ class App extends Component {
       index:this.state.index,
       selectedFiles:this.state.selectedFiles,
       keywordsJson:this.state.keywordsJson,
-      addFile:addFile
+      initFile:initFile,
+      addFile:addFile,
+      forceUpdate: forceUpdate
     }).then(res=>{
       let topic = res.data.topic
+      let options = res.data.options
       this.setState({
+        selectedFiles: res.data.selectedFiles,
         items:res.data.items,
+        options: options,
         title:res.data.title,
         description:res.data.description,
         dataLength:res.data.dataLength,
         topicPrev:res.data.topicPrev,
         topic:topic,
-        selectedOption:(topic==="")?null:this.state.options.find((element)=>element.label===topic),
-        topicValue:(topic==="")?null:this.state.options.find((element)=>element.label===topic).value,
+        selectedOption:(topic==="")?null:options.find((element)=>element.label===topic),
+        topicValue:(topic==="")?null:options.find((element)=>element.label===topic).value,
         correct:res.data.correct,
         keyword:[],
         keywordSearch:'',
@@ -307,19 +301,19 @@ class App extends Component {
         updateDone:res.data.updateDone,
         dataModified:false
       })
-      const options = {};
-      var elems = document.querySelectorAll('select');
-      M.FormSelect.init(elems, options);
+      M.FormSelect.init(document.querySelectorAll('select',{}))
     })
     .catch(err=>console.log(err))
   }
   deleteFile(deleteFiles){
+    let forceUpdate = false
     let selectedFiles = this.state.selectedFiles
     for (var i in deleteFiles){
       if(deleteFiles[i].status){
         var index = selectedFiles.indexOf(deleteFiles[i].file); 
         if (index > -1) {
             selectedFiles.splice(index, 1);
+            forceUpdate=true
         }
       }
     }
@@ -328,8 +322,8 @@ class App extends Component {
       console.log("delete files:",deleteFiles)
       axios.post('/api/deleteFile',{
         deleteFiles: deleteFiles,
-        selectedFiles:selectedFiles
-      }).then(res=>{if(res.data.deleteDone) this.refreshData()})
+        selectedFiles: selectedFiles,
+      }).then(res=>{if(res.data.deleteDone) this.refreshData(true,false,forceUpdate)})
     })
   }
   keyFunction(event) {
@@ -352,28 +346,39 @@ class App extends Component {
     }
   }
   componentDidMount() {
-    this.initData()
+    this.refreshData(true)
     document.addEventListener('FilePond:processfile', e => {
       if (e.detail.error) {
           console.log('Upload Failed');
           return;
-      } else 
-      this.setState({
-        selectedFiles: [...this.state.selectedFiles, this.state.files[0].name]
-      },()=>{
-        if (e.detail.file.filename==='all_items_Merged.json') 
-        this.initData()
-        else this.refreshData(true)
-      })
-    });
+      } else {
+        console.log("upload :", this.state.files[0].name)
+        switch (this.state.files[0].name){
+          case "all_items_Merged.json": this.refreshData(true);break;
+          case "topics_keywords_latest.json": this.refreshData(false, false, true);break;
+          default: 
+            if (this.state.selectedFiles===undefined)
+            this.setState({ selectedFiles:this.state.files[0].name},()=>this.refreshData(false,true))
+            else 
+            this.setState({
+              selectedFiles: [...this.state.selectedFiles, this.state.files[0].name]
+            }, () => this.refreshData(false, true))
+            break;
+        }
+      }
+    })
     document.addEventListener("keydown", this.keyFunction, false);
   }
   componentWillUnmount(){
     document.removeEventListener("keydown", this.keyFunction, false);
   }  
   render() {
-    if(this.state.loaded){
-      let titleHTML = this.state.title.split(/\W+/);
+      var titleHTML = this.state.title
+      if (this.state.characterSpace===''){
+        titleHTML = titleHTML.split('')
+      }else{
+        titleHTML = titleHTML.split(/\W+/);
+      }
       let symbol = this.state.title.split(/\w+/);
       titleHTML = titleHTML.map((word,i)=>
         <><span
@@ -382,7 +387,7 @@ class App extends Component {
           className={(this.state.keyword.find(element=>element.word===word)!==undefined)?
           "selectTitle orange-text text-darken-4 active waves-effect waves-orange waves-ripple"
           :"selectTitle waves-effect waves-orange waves-ripple"}
-        > {word} </span> {symbol[i+1]} </>
+        >{word}</span>{symbol[i+1]}{this.state.characterSpace}</>
       )
       let slideRenderer = ({ key, index }) => (
         <div key={index}>
@@ -397,22 +402,28 @@ class App extends Component {
         </div>
       )
       return (
+        <>
         <div className="container">
-          {!this.state.updateDone?
-          <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
-            <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
-          </div>:<></>}
+          <div className="loading" style={this.state.updateDone?{display:"none"}:null}>
+            <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
+              <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
+            </div>
+          </div>
           <div  id="cardContent" className="card" style={{textAlign:"center",marginTop:".5rem",marginBottom:"3px"}} >
             <nav class="nav-extended orange">
               <div class="nav-wrapper orange">
                 <form style={{height:"64px"}} onSubmit={(e)=>{
-                  e.preventDefault()
-                  const search = this.state.keywordSearch.split(/\W+/);
-                  const searchList = search.map((word, i)=>{
-                    return {key:i, word:word}
-                  })
-                  console.log('search on :',searchList)
-                  this.setState({checkDisabled:false,keyword:searchList},()=>document.getElementById("checkBtn").click())
+                    e.preventDefault()
+                    var search = this.state.keywordSearch
+                    if (XRegExp('[\\p{Han}]').test(search) || XRegExp('[\\p{Hiragana}]').test(search) || XRegExp('[\\p{Katakana}]').test(search) || XRegExp('[\\p{Hangul}]').test(search))
+                    {search = search.split('');this.setState({characterSpace:''})}
+                    else
+                    { search = search.split(/\W+/); this.setState({ characterSpace: ' ' })}
+                    const searchList = search.map((word, i)=>{
+                      return {key:i, word:word}
+                    })
+                    console.log('search on :',searchList)
+                    this.setState({checkDisabled:false,keyword:searchList},()=>document.getElementById("checkBtn").click())
                 }}>
                   <div class="input-field orange">
                     <input autocomplete="off" required id="search" type="search" value={this.state.keywordSearch} 
@@ -449,7 +460,7 @@ class App extends Component {
                     <i id="refreshBtn" 
                       style={{fontSize:"2rem"}}
                       className="material-icons white-text"
-                      onClick={this.refreshData}
+                        onClick={()=>this.refreshData(false, false, true)}
                       title="This will reload data, save keywords file first">cached
                     </i>
                   </div>
@@ -457,7 +468,7 @@ class App extends Component {
                 <Editor 
                   keywordsJson = {this.state.keywordsJson} 
                   editJson = {this.editJson} 
-                  jsonUpdateRefresh={this.refreshData} 
+                    jsonUpdateRefresh={() =>this.refreshData(false,false,true)} 
                   clearKeywords={this.clearKeywords}
                 />    
               </div>
@@ -563,14 +574,8 @@ class App extends Component {
             }}>
           </FilePond>
         </div>
+        </>
       );
-    } else {
-      return (
-        <div style={{width:'100vw',height:'100vh'}} className="valign-wrapper center-align">
-          <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
-        </div>
-      )
-    }
   }
 }
 export default process.env.NODE_ENV === "development" ? hot(module)(App) : App

@@ -1,3 +1,4 @@
+/* eslint-disable no-sequences */
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -8,6 +9,7 @@ const cookieParser = require('cookie-parser')
 const fileUpload = require('express-fileupload')
 const cors = require('cors')
 const JSZip = require("jszip");
+const XRegExp = require('xregexp');
 let zip = new JSZip();
 
 const app = express();
@@ -39,95 +41,23 @@ app.get('/', (req,res) =>{
     res.sendFile(path.join(__dirname+'/build/index.html'));
 });
 
-app.get('/api/initData', (req,res) => {
-    const files = fs.readdirSync('./data')
-    let fileName = []
-    let items = []
-    files.forEach(function (file) {
-        if(path.extname('./data'+file)===".csv"){
-            fileName.push(file)
-            items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
-        }
-    })
-    let selectedFiles = []
-    try {
-        selectedFiles = require('./data/selected_files.json')
-        if (selectedFiles.length === 0) selectedFiles = fileName
-    } catch {
-        selectedFiles = fileName
-    }
-    const topicJson = require('./data/topics_keywords_latest.json')
-    const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
-    let options=[]
-    let ordered = {};
-    let keywordsJson = {};
-    Object.keys(topicJson).sort(Intl.Collator().compare).forEach(function(key) {
-        ordered[key] = topicJson[key];
-    })
-    for (var key in ordered) {
-        if (ordered.hasOwnProperty(key)) {
-            options.push({value: key, label: ordered[key].ui_text[0]});
-            keywordsJson[key] = ordered[key].keywords
-        }
-    }
-    var data = []
-    var displayedData = []
-    try {
-        require('./data/all_items_Merged.json')
-        displayedData = require('./data/all_items_Merged.json')
-    } catch {
-        for (var i = 0; i < selectedFiles.length; i++){
-            var csvFilePath = fs.readFileSync("./data/" + selectedFiles[i], "utf8"); 
-            Papa.parse(csvFilePath, {
-                header: true,
-                skipEmptyLines: true,
-                complete: initData
-            })
-        }
-        function initData(results){
-            data.push(results.data);
-            if ((data.length === selectedFiles.length)){
-                data = [].concat.apply([], data)
-                console.log("total items: ", data.length)
-                let filtered = []
-                keywordsArr.map(key=>
-                    filtered.push(
-                        data.filter(
-                            item=>item.Title.toLowerCase().replace(/[\W_]+/g," ").indexOf(key.toLowerCase())>-1
-                        )
-                    )
-                )
-                filtered = [].concat.apply([], filtered);
-                let displayedData = data.filter(obj=>!filtered.some(obj2=>obj.Title===obj2.Title))
-                console.log("display items: ", displayedData.length)
-                fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
-                fs.writeFileSync('./data/selected_files.json', JSON.stringify(selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
-            } 
-        }
-    } 
-    res.json({
-        dataLength:displayedData.length,
-        options:options,
-        items:items,
-        keywordsJson:keywordsJson,
-        selectedFiles:selectedFiles
-    });
-});
-
 app.get('/api/loadNewItem/:index', function(req, res) {
     try{
         const data = require('./data/all_items_Merged.json')
         const index = req.params.index
+        const title = data[index].Title
         res.json({
             dataLength: data.length,
-            title: data[index].Title,
+            title: title,
             description: data[index].Description,
             topicPrev: data[index].Topic,
             topic: data[index].TopicModified===undefined?"":data[index].TopicModified,
-            correct: data[index].Correct===0?false:(data[index].Correct===undefined?false:true)
+            correct: data[index].Correct===0?false:(data[index].Correct===undefined?false:true),
+            characterSpace: (XRegExp('[\\p{Han}]').test(title) || XRegExp('[\\p{Hiragana}]').test(title) || XRegExp('[\\p{Katakana}]').test(title) || XRegExp('[\\p{Hangul}]').test(title)?'':' ')
         })
     }
-    catch {
+    catch (e) {
+        console.log(e)
         res.json({
             dataLength: 0,
             title: "No data loaded",
@@ -158,9 +88,14 @@ app.post('/api/filterData', function(req, res) {
             return 1;
         return 0;
     })
-    queryKeyword = queryKeyword.map(item=>{return item.word}).join(" ").toLowerCase().trim()
+    queryKeyword = queryKeyword.map(item => item.word).join(req.body.characterSpace).toLowerCase().trim()
+    console.log(queryKeyword)
     let queryData = data.filter((item)=>{
-        let titleText = item.Title.toLowerCase().replace(/[\W_]+/g," ");
+        let title = item.Title.toLowerCase()
+        var titleText
+        if (req.body.characterSpace===' ')
+        titleText = title.replace(/[\W_]+/g, " ");
+        else titleText = title;
         return (titleText.indexOf(queryKeyword)!==-1)
     })
     let indexArr = queryData.map(item=>{
@@ -199,7 +134,6 @@ app.post('/api/updateData', function(req, res) {
         fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     }
-    // eslint-disable-next-line no-sequences
     keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
     res.json({
         updateDone:true,
@@ -214,38 +148,46 @@ app.post('/api/updateData', function(req, res) {
 }); 
 
 app.post('/api/refreshData', function(req, res) {
+    var data = []
+    var displayedData = []
     const files = fs.readdirSync('./data')
-    let topicJson = require('./data/topics_keywords_latest.json')
-    let keywordsJson = {}
-    for (var x in topicJson) {
-        if (topicJson.hasOwnProperty(x)) {
-            keywordsJson[x] = topicJson[x].keywords
-        }
-    }
-    let items = []
-    files.forEach(function (file) {
-        if(path.extname('./data'+file)===".csv"){
-            items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
-        }
-    })
-    // eslint-disable-next-line no-sequences
-    keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
-    const selectedFiles=req.body.selectedFiles
-    var existSelectedFiles = []
-    var same = true
+    let fileName = []
+    var topicJson
+    var items = []
+    var keywordsJson = {}
+    var existFile=false
     try{
-        existSelectedFiles=require("./data/selected_files.json")
-        for (var file in existSelectedFiles){
-            if(selectedFiles[file]!==existSelectedFiles[file])
-            same = false
+        topicJson = require('./data/topics_keywords_latest.json')
+        if(req.body.initFile){
+            try {
+                displayedData = require('./data/all_items_Merged.json')
+                existFile = true
+            }
+            catch { existFile = false }
         }
-    } catch {
-        same=false
-    }
-    const index = req.body.index
-    if((selectedFiles.length!==0&&!same)||req.body.addFile){
-        for(var k in topicJson){topicJson[k].keywords = req.body.keywordsJson[k]}
-        const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
+        for (var x in topicJson) {
+            if (topicJson.hasOwnProperty(x)) {
+                keywordsJson[x] = topicJson[x].keywords
+            }
+        }
+        files.forEach(function (file) {
+            if(path.extname('./data'+file)===".csv"){
+                fileName.push(file)
+                items.push({id:file,label:file.substr(file.lastIndexOf('_')+1,file.lastIndexOf('.')-file.lastIndexOf('_')-1)})
+            }
+        })
+        var selectedFiles=req.body.selectedFiles
+        var existSelectedFiles = []
+        try{
+            existSelectedFiles=require("./data/selected_files.json")
+            if (req.body.initFile && selectedFiles===null) {
+                selectedFiles = existSelectedFiles
+                if (existSelectedFiles.length === 0) selectedFiles = fileName
+            }
+        } catch {
+            selectedFiles = fileName
+            existFile = false
+        }
         let options=[]
         let ordered = {};
         Object.keys(topicJson).sort(Intl.Collator().compare).forEach(function(key) {
@@ -257,47 +199,62 @@ app.post('/api/refreshData', function(req, res) {
                 keywordsJson[key] = ordered[key].keywords
             }
         }
-        var data = []
-        var displayedData = []
-        for (var i = 0; i < selectedFiles.length; i++){
-            var csvFilePath = fs.readFileSync("./data/"+selectedFiles[i], "utf8"); 
-            Papa.parse(csvFilePath, {
-                header: true,
-                skipEmptyLines: true,
-                complete: initData
-            })
+        if (Object.keys(req.body.keywordsJson).length!==0){
+            console.log("hey")
+            for(var k in topicJson){
+                topicJson[k].keywords = req.body.keywordsJson[k]
+                keywordsJson[k] = req.body.keywordsJson[k]
+            }
         }
-        function initData(results){
-            data.push(results.data);
-            if ((data.length === selectedFiles.length)){
-                data = [].concat.apply([], data)
-                console.log("total items: ", data.length)
-                let filtered = []
-                keywordsArr.map(key=>
-                    filtered.push(
-                        data.filter(
-                            item=>{
-                                if(item.Title!==undefined){
-                                    let titleText = item.Title.toLowerCase().replace(/[\W_]+/g," ")
-                                    return titleText.indexOf(key.toLowerCase())>-1
-                                } else {
-                                    return undefined
+        keywordsJson = Object.keys(keywordsJson).sort().reduce((a, c) => (a[c] = keywordsJson[c], a), {})
+        const keywordsArr = [].concat.apply([],Object.values(topicJson).map((val)=>val.keywords))
+        const index = req.body.index
+        if ((selectedFiles.length !== 0 && !existFile) || req.body.addFile || req.body.forceUpdate){
+            for (var i = 0; i < selectedFiles.length; i++) {
+                var csvFilePath = fs.readFileSync("./data/"+selectedFiles[i], "utf8"); 
+                Papa.parse(csvFilePath, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: initData
+                })
+            }
+            function initData(results){
+                data.push(results.data);
+                if ((data.length === selectedFiles.length)){
+                    data = [].concat.apply([], data)
+                    console.log("total items:", data.length)
+                    let filtered = []
+                    keywordsArr.map(key=>
+                        filtered.push(
+                            data.filter(
+                                item=>{
+                                    if(item.Title!==undefined){
+                                        let titleText = item.Title.toLowerCase().replace(/[\W_]+/g," ")
+                                        return titleText.indexOf(key.toLowerCase())>-1
+                                    } else {
+                                        return undefined
+                                    }
                                 }
-                            }
-                                
+                                    
+                            )
                         )
                     )
-                )
-                filtered = [].concat.apply([], filtered);
-                displayedData = data.filter(obj=>!filtered.some(obj2=>obj.Title===obj2.Title))
-                console.log("display items: ", displayedData.length)
-                fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
-            } 
+                    filtered = [].concat.apply([], filtered);
+                    displayedData = data.filter(obj=>!filtered.some(obj2=>obj.Title===obj2.Title))
+                    console.log("display items: ", displayedData.length)
+                    fs.writeFileSync('./data/all_items_Merged.json', JSON.stringify(displayedData) , 'utf-8',(err,result)=>{if(err) console.log(err)});
+                } 
+            }
+            fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+            fs.writeFileSync('./data/selected_files.json', JSON.stringify(selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
+        } 
+        else {
+            if(!existFile)
+            throw Error
         }
-        fs.writeFileSync('./data/topics_keywords_latest.json', JSON.stringify(topicJson) , 'utf-8',(err,result)=>{if(err) console.log(err)})
-        fs.writeFileSync('./data/selected_files.json', JSON.stringify(selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
         res.json({
             items:items,
+            options:options,
             updateDone:true,
             dataLength: displayedData.length,
             title: displayedData[index].Title,
@@ -305,48 +262,34 @@ app.post('/api/refreshData', function(req, res) {
             topicPrev: displayedData[index].Topic,
             topic: displayedData[index].TopicModified===undefined?"":displayedData[index].TopicModified,
             correct: displayedData[index].Correct===0?false:(displayedData[index].Correct===undefined?false:true),
+            keywordsJson: keywordsJson,
+            selectedFiles: selectedFiles
+        });
+    }catch{
+        res.json({
+            items: items,
+            updateDone: true,
+            dataLength: 0,
+            title: "No data loaded",
+            description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
+            topicPrev: "",
+            topic: "",
+            correct: false,
             keywordsJson: keywordsJson
         });
-    } else {
-        if(same){
-            displayedData = require('./data/all_items_Merged.json')
-            res.json({
-                items:items,
-                updateDone:true,
-                dataLength: displayedData.length,
-                title: displayedData[index].Title,
-                description: displayedData[index].Description,
-                topicPrev: displayedData[index].Topic,
-                topic: displayedData[index].TopicModified===undefined?"":displayedData[index].TopicModified,
-                correct: displayedData[index].Correct===0?false:(displayedData[index].Correct===undefined?false:true),
-                keywordsJson: keywordsJson
-            });
-        } else {
-            res.json({
-                items:items,
-                updateDone:true,
-                dataLength: 0,
-                title: "No data loaded",
-                description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
-                topicPrev: "",
-                topic: "",
-                correct: false,
-                keywordsJson: keywordsJson
-            });
-        }
     }
 })
 
 app.post('/api/deleteFile', (req, res) => {
     for (var i in req.body.deleteFiles){
-        if (req.body.deleteFiles[i].status) fs.unlinkSync('./data/' + req.body.deleteFiles[i].file)
+        if (req.body.deleteFiles[i].status) {
+            fs.unlinkSync('./data/' + req.body.deleteFiles[i].file)
+        }
     }
-    fs.writeFileSync('./data/selected_files.json', JSON.stringify(req.body.selectedFiles) , 'utf-8',(err,result)=>{if(err) console.log(err)})
     if (req.body.selectedFiles.length===0) {
-        fs.unlinkSync('./data/selected_files.json')
         fs.unlinkSync('./data/all_items_Merged.json')
     }
-    res.json({deleteDone:true})
+    res.json({ deleteDone: true }) 
 })
 
 app.post('/api/upload', (req, res) => {

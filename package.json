@@ -50,7 +50,8 @@
     "webpack-dev-middleware": "^3.6.2",
     "webpack-hot-middleware": "^2.24.3",
     "xlsx": "^0.14.2",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "xregexp": "^4.2.4"
   },
   "scripts": {
     "start": "react-app-rewired start",
