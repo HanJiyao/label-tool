@@ -212,7 +212,7 @@ class App extends Component {
     this.setState({ index: index, keyword: [], keywordSearch: '', checkDisabled: true},()=>this.loadNewItem())
   }
   clearSearch(){
-    this.setState({keyword:[],keywordSearch:'',checkDisabled:true})
+    this.setState({ keyword: [], keywordSearch: '', checkDisabled: true }, () => this.loadNewItem())
   }
   filterData(){
     axios.post('/api/filterData',{
@@ -229,7 +229,7 @@ class App extends Component {
   jsonUpdate(){
     this.setState({
       updateDone:false,
-      title:'Loading。。。',
+      title:'Loading丶丶丶',
       description:'Please be patient (´・ω・｀)'
     })
     axios.post('/api/updateData',{
@@ -268,7 +268,7 @@ class App extends Component {
     this.clearKeywords()
     this.setState({
       updateDone:false,
-      title:'Loading。。。',
+      title:'Loading丶丶丶',
       description:'Please be patient (´・ω・｀)'
     })
     axios.post('/api/refreshData',{

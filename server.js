@@ -200,7 +200,6 @@ app.post('/api/refreshData', function(req, res) {
             }
         }
         if (Object.keys(req.body.keywordsJson).length!==0){
-            console.log("hey")
             for(var k in topicJson){
                 topicJson[k].keywords = req.body.keywordsJson[k]
                 keywordsJson[k] = req.body.keywordsJson[k]

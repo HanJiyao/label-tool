@@ -14,7 +14,7 @@
     "express": "^4.16.4",
     "express-fileupload": "^1.1.4",
     "file-saver": "^2.0.1",
-    "filepond": "^4.3.9",
+    "filepond": "^4.4.0",
     "fs": "0.0.1-security",
     "hot-loader": "0.0.0",
     "html-loader": "^0.5.5",
