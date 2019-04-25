@@ -135,6 +135,9 @@ body {
   .valign-wraper,.col.m8.s12{
     padding-top: 0!important
   }
+  .tool-bar {
+    padding: 30px 8px 0 8px!important
+  }
 }
 @media only screen and (min-width: 600px) {
   .statusCol{

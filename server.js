@@ -61,7 +61,7 @@ app.get('/api/loadNewItem/:index', function(req, res) {
         res.json({
             dataLength: 0,
             title: "No data loaded",
-            description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
+            description: "Please check the file selection / upload below ",
             topicPrev: "",
             topic: "",
             correct: false
@@ -199,7 +199,7 @@ app.post('/api/refreshData', function(req, res) {
                 keywordsJson[key] = ordered[key].keywords
             }
         }
-        if (Object.keys(req.body.keywordsJson).length!==0){
+        if (Object.keys(req.body.keywordsJson).length!==0&&req.body.forceUpdate){
             for(var k in topicJson){
                 topicJson[k].keywords = req.body.keywordsJson[k]
                 keywordsJson[k] = req.body.keywordsJson[k]
@@ -270,7 +270,7 @@ app.post('/api/refreshData', function(req, res) {
             updateDone: true,
             dataLength: 0,
             title: "No data loaded",
-            description: "Please check the file selection / upload below  Σ(っ °Д °;)っ",
+            description: "Please check the file selection / upload below ",
             topicPrev: "",
             topic: "",
             correct: false,

@@ -229,8 +229,9 @@ class App extends Component {
   jsonUpdate(){
     this.setState({
       updateDone:false,
-      title:'Loading丶丶丶',
-      description:'Please be patient (´・ω・｀)'
+      topicPrev:'',
+      title:'Loading • • • ',
+      description:'Please be patient'
     })
     axios.post('/api/updateData',{
       index:this.state.index,
@@ -268,8 +269,9 @@ class App extends Component {
     this.clearKeywords()
     this.setState({
       updateDone:false,
-      title:'Loading丶丶丶',
-      description:'Please be patient (´・ω・｀)'
+      topicPrev:'',
+      title:'Loading • • • ',
+      description:'Please be patient'
     })
     axios.post('/api/refreshData',{
       index:this.state.index,
@@ -392,7 +394,11 @@ class App extends Component {
       let slideRenderer = ({ key, index }) => (
         <div key={index}>
             <div className="card-content row" style={{textAlign:"left",margin:"0",paddingTop:".5rem"}}>
-                <Scrollbars autoHide className="customScroll" style={{height: 80, margin:"1.5rem 0 .5rem", padding:"0 .75rem",overflowX:"hidden",overflowY:"scroll"}}>
+                <h6 style={{marginTop:'0.8rem',padding:"0 .75rem"}}>
+                  <strong style={(this.state.topicPrev.replace(/[["\]]/g, '')===""||this.state.topicPrev.replace(/[["\]]/g, '')==="Cannot be determined")?{color:"red"}:null}>
+                  {this.state.topicPrev.replace(/[["\]]/g, '')===""?"Cannot be determined":this.state.topicPrev.replace(/[["\]]/g, '')}</strong>
+                </h6>
+                <Scrollbars autoHide className="customScroll" style={{height: 80, margin:"1rem 0 .5rem", padding:"0 .75rem",overflowX:"hidden",overflowY:"scroll"}}>
                     <p style={{fontSize:"1.8rem",padding:"0 .75rem"}}>{titleHTML}</p>
                 </Scrollbars>
                 <Scrollbars autoHide className="customScroll" style={{height: 87, margin:".1rem 0", padding:"0 .75rem",overflowX:"hidden",overflowY:"scroll"}}>
@@ -406,10 +412,10 @@ class App extends Component {
         <div className="container">
           <div className="loading" style={this.state.updateDone?{display:"none"}:null}>
             <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
-              <img style={{margin:"auto"}} src={load} alt="Loading..." height="200" width="200"/>
+              <img style={{margin:"auto"}} src={load} alt="Loading..." height="100" width="100"/>
             </div>
           </div>
-          <div  id="cardContent" className="card" style={{textAlign:"center",marginTop:".5rem",marginBottom:"3px"}} >
+          <div  id="cardContent" className="card z-depth-4" style={{textAlign:"center",marginTop:"1.5rem",marginBottom:"3px"}} >
             <nav class="nav-extended orange">
               <div class="nav-wrapper orange">
                 <form style={{height:"64px"}} onSubmit={(e)=>{
@@ -440,11 +446,12 @@ class App extends Component {
                       :<a style={{paddingTop: "3.6px"}} onClick={()=>this.setState({animation:true})}><i class="material-icons">input</i></a>}
                   </li>
                   <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
-                  <li><a style={{paddingTop: "3.6px"}}><i class="material-icons">more_vert</i></a></li>
+                  <li><a href="https://github.wdf.sap.corp/ML-Leonardo/ML-SFSF-LearningRecommendations/tree/master/research/topics/lr_topics_tool" target="_blank" rel="noopener noreferrer" style={{paddingTop: "3.6px"}}><i class="material-icons">contact_support</i></a></li>
                 </ul>
               </div>
               <div class="nav-content">
-                <div className="row" style={{margin:"0",padding:"30px 8px 0 8px"}}>
+                <div className="row tool-bar" style={{margin:"0",padding:"30px 50px 0 50px"}}>
+                  <div className="col m2 hide-on-small-only"></div>
                   <div className="input-field col s3 m2">
                     <input style={{color:"white"}} type="number" id="index" 
                       value={this.state.index} 
@@ -455,20 +462,13 @@ class App extends Component {
                     elems={this.state.items} 
                     selectedFiles={this.state.selectedFiles} 
                     changeFiles={this.changeFiles}
+                    refreshData = {()=>this.refreshData(false, false, true)}
                   />
-                  <div className="col s2 m1">
-                    <i id="refreshBtn" 
-                      style={{fontSize:"2rem"}}
-                      className="material-icons white-text"
-                        onClick={()=>this.refreshData(false, false, true)}
-                      title="This will reload data, save keywords file first">cached
-                    </i>
-                  </div>
                 </div>
                 <Editor 
                   keywordsJson = {this.state.keywordsJson} 
                   editJson = {this.editJson} 
-                    jsonUpdateRefresh={() =>this.refreshData(false,false,true)} 
+                  jsonUpdateRefresh={()=>this.refreshData(false, false, true)} 
                   clearKeywords={this.clearKeywords}
                 />    
               </div>
@@ -505,7 +505,7 @@ class App extends Component {
                       </button>
                   </div>
                 </div>
-                <div className="card-content row" style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)",margin:"0"}}>
+                <div className="card-content row" style={{textAlign:"left",paddingTop:"0",paddingBottom:"36px",borderTop:"1px solid rgba(160,160,160,0.2)",margin:"0"}}>
                   <div className="col s2 hide-on-small"></div>
                   <div className="col s12 m8">
                   {(this.state.correct)?
@@ -518,7 +518,7 @@ class App extends Component {
                     <div className="row" style={this.state.correct ? {display:'none'} : {paddingTop:"2rem",margin:"0",height:"85px"}}>
                       <div className="col s12 l6">
                         <Select 
-                          placeholder="Select Topic ..."
+                          placeholder="Select Topic . . ."
                           classNamePrefix="react-select"
                           ref={ref => { this.selectRef = ref; }}
                           blurInputOnSelect
