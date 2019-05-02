@@ -41,6 +41,34 @@ app.get('/', (req,res) =>{
     res.sendFile(path.join(__dirname+'/build/index.html'));
 });
 
+app.get('/api/initData', function(req, res) {
+    const csvFilePath = fs.readFileSync("./mongo/all_items_DisneyTEST.csv", "utf8");
+    let keywordsJson = require('./mongo/topics_keywords_latest.json')
+    let options=[] 
+    let ordered = {};
+    Object.keys(keywordsJson).sort(Intl.Collator().compare).forEach(function(key) {
+        ordered[key] = keywordsJson[key];
+    })
+    for (var key in ordered) {
+        if (ordered.hasOwnProperty(key)) {
+            options.push({value: key, label: ordered[key].ui_text[0]});
+            keywordsJson[key] = ordered[key].keywords
+        }
+    }
+    Papa.parse(csvFilePath, {
+        header: true,
+        skipEmptyLines: true,
+        complete: initData
+    })
+    function initData(results){
+        res.json({
+            data: results.data,
+            keywordsJson: keywordsJson,
+            options : options
+        })
+    }
+})
+
 app.get('/api/loadNewItem/:index', function(req, res) {
     try{
         const data = require('./data/all_items_Merged.json')

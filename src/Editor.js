@@ -42,15 +42,14 @@ class Editor extends Component {
                 src={this.props.keywordsJson} 
                 theme="google"
                 displayDataTypes={false}
-                onEdit={this.props.editJson}
-                onAdd={this.props.editJson}
+                enableClipboard={false}
                 onDelete={this.props.editJson}
               />
             </Scrollbars>
             :<h5 className="center-align white-text"> Loading • • • </h5>}
           </div>
           <div className="modal-footer" style={{background:"rgb(29, 31, 33)"}}>
-            <button type="submit" className="modal-close waves-effect waves btn" style={{ background: "rgb(57, 113, 237)", borderRadius: '100px'}} onClick={this.props.jsonUpdateRefresh}>
+            <button type="submit" className="modal-close waves-effect waves btn" style={{ background: "rgb(57, 113, 237)", borderRadius: '100px'}}>
               <i className="material-icons left" style={{lineHeight:"1.5"}}>
                 save
               </i> save
