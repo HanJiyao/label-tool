@@ -43,6 +43,7 @@ class Editor extends Component {
                 theme="google"
                 displayDataTypes={false}
                 enableClipboard={false}
+                onEdit={this.props.editJson}
                 onDelete={this.props.editJson}
               />
             </Scrollbars>

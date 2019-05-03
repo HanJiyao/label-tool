@@ -90,6 +90,9 @@ Manual edit JSON by top right corner button make the review and revert of change
 ## For developer 
 
 ### Docker
+```
+docker run -p 2233:2233 -it --name lr_tool -v /data/lr_topics/:/data lssinh010.sin.sap.corp/mlsgdgx1/lr_topics_tool:latest /bin/bash
+```
 
 Source location at `/data/lr_topics/label-tool`
 

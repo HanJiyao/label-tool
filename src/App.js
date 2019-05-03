@@ -2,13 +2,14 @@
 import  React, { Component } from 'react';
 import axios from 'axios';
 import load from './load.svg';
+import gitImg from './git.png'
 import 'materialize-css'
 import 'materialize-css/dist/css/materialize.min.css';
 import M from "materialize-css";
 import './App.css';
 import Table from './Table'
 import Editor from './Editor'
-import Select from 'react-select';
+import MSelect from './Select'
 
 class App extends Component {
     constructor() {
@@ -17,25 +18,39 @@ class App extends Component {
             load:true,
             data: [],
             keywordsJson:{},
-            options:[],
-            selectedOption:null,
             topic: '',
-            topicValue: '',
+            keywords: '',
+            checked:false,
+            tenants:[
+                {id:'CoastCapial',label:'CoastCapial'},
+                {id:'SAPLearningHub',label:'SAPLearningHub'},
+                {id:'Nedbank',label:'Nedbank'},
+            ],
+            selectedTenant:[],
+            modified:false,
         };
         this.editJson = this.editJson.bind(this);
         this.handleTopicChange = this.handleTopicChange.bind(this);
+        this.changeTenant = this.changeTenant.bind(this);
     }
     componentDidMount() {
         this.setState({load:false})
         axios.get('/api/initData/')
         .then(res=>{
+            const keywordsJson = res.data.keywordsJson
             this.setState({
                 load:true,
                 data: res.data.data,
-                keywordsJson: res.data.keywordsJson,
-                options : res.data.options
+                keywordsJson: keywordsJson,
             })
-            M.FormSelect.init(document.querySelectorAll('select',{}))
+            const options = {}
+            for (var i in keywordsJson){
+                options[i] = null
+            }
+            M.FormSelect.init(document.querySelectorAll('select', {}))
+            M.Autocomplete.init(document.querySelectorAll('.autocomplete'), {
+                data:options
+            });
         })
         .catch(err=>console.log(err))
     }
@@ -48,7 +63,24 @@ class App extends Component {
           topicValue:selectedOption.value,
           selectedOption:selectedOption
         })
-      } 
+    } 
+    handleCreate = (inputValue) => {
+        const createOption = (label) => ({
+            label,
+            value: label.toLowerCase().replace(/\W/g, ''),
+        });
+        const options = this.state.options;
+        const newOption = createOption(inputValue);
+        this.setState({
+            options: [...options, newOption],
+            selectedOption : newOption,
+            topic: newOption.label,
+            topicValue: newOption.value
+        });
+    }
+    changeTenant(selectedTenant){
+        this.setState({selectedTenant:selectedTenant})
+    }
     render() {
         return (
             <div className="container">
@@ -67,29 +99,19 @@ class App extends Component {
                                     <a  href="https://github.wdf.sap.corp/ML-Leonardo/ML-SFSF-LearningRecommendations/tree/master/research/topics/lr_topics_tool" 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
-                                        style={{paddingTop: "3.6px"}}>
-                                        <i class="material-icons">contact_support</i>
+                                        style={{paddingTop: "6px"}}>
+                                        <img style={{margin:"auto"}} src={gitImg} alt="Git" height="20" width="20"/>
                                     </a>
                                 </li>
                             </ul>
                         </div>
-                        <div class="nav-content white black-text">
-                            <div className="row" style={this.state.correct ? {display:'none'} : {paddingTop:"2rem",margin:"0",height:"85px"}}>
-                                <div className="col s12 l6">
-                                    <Select 
-                                        placeholder="Select Topic . . ."
-                                        classNamePrefix="react-select"
-                                        ref={ref => { this.selectRef = ref; }}
-                                        blurInputOnSelect
-                                        value={this.state.selectedOption}
-                                        options={this.state.options} 
-                                        onChange={this.handleTopicChange}
-                                    />
-                                </div>
-                                <div class="input-field col s12 l6">
-                                    <input id="keywords" type="text" class="validate" />
-                                    <label for="keywords">New keywords</label>
-                                </div>
+                        <div class="bak nav-content orange">
+                            <div className="row tool-bar" style={{margin:"0",padding:"30px 50px 0 50px"}}>
+                                <MSelect 
+                                    elems={this.state.tenants} 
+                                    selectedTenant={this.state.selectedTenant} 
+                                    changeTenant={this.changeTenant}
+                                />
                             </div>
                             <Editor 
                                 keywordsJson = {this.state.keywordsJson} 
@@ -97,8 +119,44 @@ class App extends Component {
                             />    
                         </div>
                     </nav>
-                    <div className="content-wrapper" style={{textAlign:'left', padding:'3rem'}}>
-                        <Table data = {this.state.data}/>
+                    <div className="content-wrapper" style={{textAlign:'left'}}>
+                        <Table style={{padding:'20px'}} data = {this.state.data}/>
+                        <div style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)",margin:"0"}}>
+                            <div className="row" style={this.state.correct ? {display:'none'} : {padding:"1.5rem .5rem",margin:"0"}}>
+                                <div class="input-field col s6 l3" style={{marginTop:'.2rem',marginBottom:'0'}}>
+                                    <i class="material-icons prefix">keyboard_arrow_right</i>
+                                    <input type="text" id="autocomplete-input" className="autocomplete" autocomplete="false"/>
+                                    <label for="autocomplete-input">Topic</label>
+                                </div>
+                                <div class="input-field col s6 l3" style={{marginTop:'.2rem',marginBottom:'0'}}>
+                                    <input id="keywords" type="text" />
+                                    <label for="keywords">Keywords</label>
+                                </div>
+                                <div className="col s6 l2">
+                                    <button id="queryBtn"
+                                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600"}} 
+                                    className='waves-effect waves-light btn-large orange'
+                                    onClick={this.checkData}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">search</i>check
+                                    </button>
+                                </div>
+                                <div className="col s6 l2">
+                                    <button id="addBtn"
+                                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600"}} 
+                                    className='waves-effect waves-light btn-large orange' 
+                                    disabled={!this.state.checked}
+                                    onClick={this.addKeywords}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">add</i>add
+                                    </button>
+                                </div>
+                                <div className="col s6 l2">
+                                    <button id="trainBtn"
+                                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600"}} 
+                                    className='waves-effect waves-light btn-large orange'
+                                    disabled={!this.state.modified}
+                                    onClick={this.checkData}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">check</i>train
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,9 +1,9 @@
 import  React, { Component } from 'react';
 import ReactTable from 'react-table'
 import "react-table/react-table.css";
+import matchSorter from 'match-sorter'
 
 class Table extends Component {
-    
     render(){
         return (
             <ReactTable
@@ -15,11 +15,17 @@ class Table extends Component {
                     columns: [
                     {
                         Header: "Title",
-                        accessor: "Title"
+                        accessor: "Title",
+                        filterMethod: (filter, rows) =>
+                            matchSorter(rows, filter.value, { keys: ["Title"] }),
+                        filterAll: true
                     },
                     {
                         Header: "Description",
-                        accessor: "Description"
+                        accessor: "Description",
+                        filterMethod: (filter, rows) =>
+                            matchSorter(rows, filter.value, { keys: ["Description"] }),
+                        filterAll: true
                     }
                     ]
                 },
@@ -28,18 +34,21 @@ class Table extends Component {
                     columns: [
                     {
                         Header: "Topic",
-                        accessor: "Topic"
+                        accessor: "Topic",
+                        filterMethod: (filter, rows) =>
+                            matchSorter(rows, filter.value, { keys: ["Topic"] }),
+                        filterAll: true
                     },
                     {
                         Header: "Score",
-                        accessor: "Score"
+                        accessor: "Score",
                     }
                     ]
                 }
                 ]}
-                defaultPageSize={100}
+                defaultPageSize={20}
                 style={{
-                height: "600px" 
+                height: "666px" 
                 }}
                 className="-striped -highlight"
             />

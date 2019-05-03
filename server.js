@@ -11,6 +11,9 @@ const cors = require('cors')
 const JSZip = require("jszip");
 const XRegExp = require('xregexp');
 let zip = new JSZip();
+const mongoose = require('mongoose');
+
+const le_lr = require('./model/le_lr')
 
 const app = express();
 // const webpack = require("webpack");
@@ -24,13 +27,18 @@ const app = express();
 //     })
 // );
 // app.use(require("webpack-hot-middleware")(compiler));
+app.use(cors());
 app.use(logger('dev'))
-app.use(cors())
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
 app.use(cookieParser())
 app.use(fileUpload())
-
+app.use(bodyParser.json());
+mongoose.connect('mongodb://lssinh033.sin.sap.corp:27017/lrdb', { useNewUrlParser: true, user:'lr', pass:'123123' });
+const connection = mongoose.connection;
+connection.once('open', function() {
+    console.log("MongoDB database connection established successfully");
+})
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.get("/dev", (req, res) =>
@@ -42,17 +50,24 @@ app.get('/', (req,res) =>{
 });
 
 app.get('/api/initData', function(req, res) {
-    const csvFilePath = fs.readFileSync("./mongo/all_items_DisneyTEST.csv", "utf8");
-    let keywordsJson = require('./mongo/topics_keywords_latest.json')
-    let options=[] 
-    let ordered = {};
-    Object.keys(keywordsJson).sort(Intl.Collator().compare).forEach(function(key) {
-        ordered[key] = keywordsJson[key];
+    const csvFilePath = fs.readFileSync("./mongo/all_items_DisneyTEST.csv", "utf8")
+    let keywordsFile = require('./mongo/topics_keywords_latest.json')
+    le_lr.find({}, function(err, docs) {
+        if (!err){ 
+            console.log(docs);
+        } else {throw err;}
+    });
+    let keywordsJson = {}
+    let ordered = {}
+    Object.keys(keywordsFile).sort(Intl.Collator().compare).forEach(function(key) {
+        ordered[key] = keywordsFile[key];
     })
     for (var key in ordered) {
         if (ordered.hasOwnProperty(key)) {
-            options.push({value: key, label: ordered[key].ui_text[0]});
-            keywordsJson[key] = ordered[key].keywords
+            keywordsJson[key] = {
+                ui_text:ordered[key].ui_text,
+                keywords:ordered[key].keywords,
+            }
         }
     }
     Papa.parse(csvFilePath, {
@@ -64,7 +79,6 @@ app.get('/api/initData', function(req, res) {
         res.json({
             data: results.data,
             keywordsJson: keywordsJson,
-            options : options
         })
     }
 })

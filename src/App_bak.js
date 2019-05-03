@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import  React, { Component } from 'react';
 import load from './load.svg';
+import gitImg from './git.png'
 import './App.css';
 import Modal from './Modal'
 import MSelect from './Select'
@@ -409,7 +410,7 @@ class App extends Component {
       )
       return (
         <>
-        <div className="container">
+        <div className="container bak">
           <div className="loading" style={this.state.updateDone?{display:"none"}:null}>
             <div style={{width:'100vw',height:'100vh',position:"fixed",top:'0',left:'0',zIndex:'99999',background:'rgba(0,0,0,0.3)'}} className="valign-wrapper center-align">
               <img style={{margin:"auto"}} src={load} alt="Loading..." height="100" width="100"/>
@@ -446,7 +447,14 @@ class App extends Component {
                       :<a style={{paddingTop: "3.6px"}} onClick={()=>this.setState({animation:true})}><i class="material-icons">input</i></a>}
                   </li>
                   <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
-                  <li><a href="https://github.wdf.sap.corp/ML-Leonardo/ML-SFSF-LearningRecommendations/tree/master/research/topics/lr_topics_tool" target="_blank" rel="noopener noreferrer" style={{paddingTop: "3.6px"}}><i class="material-icons">contact_support</i></a></li>
+                  <li>
+                    <a  href="https://github.wdf.sap.corp/ML-Leonardo/ML-SFSF-LearningRecommendations/tree/master/research/topics/lr_topics_tool" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{paddingTop: "6px"}}>
+                        <img style={{margin:"auto"}} src={gitImg} alt="Git" height="20" width="20"/>
+                    </a>
+                  </li>                
                 </ul>
               </div>
               <div class="nav-content">

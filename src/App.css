@@ -40,7 +40,7 @@ body {
   display: none;
 }
 .react-select__input,.react-select__single-value{
-  font-size: 16px;
+  font-weight: 500
 }
 .react-select__input{
   height: 40px;
@@ -72,7 +72,7 @@ body {
   top:0!important;
   line-height:1.5;
 }
-.input-field label {
+.bak .input-field label {
   color: rgba(255,255,255,0.7);
 }
 .input-field input[type=search] {
@@ -81,7 +81,7 @@ body {
 .input-field input[type=search]:focus {
   color:#000
 }
-.select-wrapper input.select-dropdown {
+.bak .select-wrapper input.select-dropdown {
   border-bottom: 1px solid rgba(255,255,255,0.7);
 }
 .input-field input[type=number]:focus + label {
@@ -90,14 +90,15 @@ body {
 .input-field input[type=number] {
   border-bottom: 1px solid rgba(255,255,255,0.7);
 }
-.input-field input[type=number]:focus, .select-wrapper input.select-dropdown:focus {
+.bak .input-field input[type=number]:focus,
+.bak .select-wrapper input.select-dropdown:focus {
   border-bottom: 1px solid #fff!important;
   box-shadow: 0 1px 0 0 #fff!important;
 }
 .input-field .prefix.active {
   color: #fff;
 }
-.select-wrapper input.select-dropdown {
+.bak .select-wrapper input.select-dropdown {
   color:white;
 }
 .select-dropdown{
@@ -106,7 +107,7 @@ body {
 .dropdown-content li span{
   color:#5a5a5a!important
 }
-.select-wrapper .caret {
+.bak .select-wrapper .caret {
   fill:white!important
 }
 #fileModal [type="checkbox"]:checked+span:not(.lever):before {
@@ -116,7 +117,23 @@ body {
 .react-select__control{
   border-radius: 100px!important
 }
-
+.ReactTable input {
+  height: 30px!important;
+  box-sizing: border-box!important;
+  margin-bottom: 0!important;
+  border-radius: 100px!important;
+}
+.ReactTable button{
+  border-radius: 100px!important;
+}
+.ReactTable input:focus{
+  border-bottom: 1px solid #ff9800!important;
+  box-shadow: 0 1px 0 0 #ff9800!important;
+}
+#react-select-2-input:focus,
+#keywords:focus{
+  box-shadow: none;
+}
 @media only screen and (max-width: 1000px) {
   #checkBtn{
     margin:1.5rem 0
