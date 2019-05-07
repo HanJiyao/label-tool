@@ -8,23 +8,27 @@ class Table extends Component {
         return (
             <ReactTable
                 data={this.props.data}
-                filterable
+                filterable 
+                defaultFilterMethod={(filter, row) =>
+                    String(row[filter.id]) === filter.value}
                 columns={[
                 {
                     Header: "Learning item",
                     columns: [
                     {
                         Header: "Title",
-                        accessor: "Title",
+                        id: "title",
+                        accessor: d => d.title,
                         filterMethod: (filter, rows) =>
-                            matchSorter(rows, filter.value, { keys: ["Title"] }),
+                            matchSorter(rows, filter.value, { keys: ["title"] }),
                         filterAll: true
                     },
                     {
                         Header: "Description",
-                        accessor: "Description",
+                        id: "description",
+                        accessor: d => d.description,
                         filterMethod: (filter, rows) =>
-                            matchSorter(rows, filter.value, { keys: ["Description"] }),
+                            matchSorter(rows, filter.value, { keys: ["description"] }),
                         filterAll: true
                     }
                     ]
@@ -34,14 +38,15 @@ class Table extends Component {
                     columns: [
                     {
                         Header: "Topic",
-                        accessor: "Topic",
+                        id: "topic",
+                        accessor: d => d.topic,
                         filterMethod: (filter, rows) =>
-                            matchSorter(rows, filter.value, { keys: ["Topic"] }),
+                            matchSorter(rows, filter.value, { keys: ["topic"] }),
                         filterAll: true
                     },
                     {
                         Header: "Score",
-                        accessor: "Score",
+                        accessor: "entropy",
                     }
                     ]
                 }

@@ -1069,10 +1069,12 @@
         ],
         "keywords_desc": [],
         "old_topics": [
-            "microsoft"
+            "microsoft",
+            "windows"
         ],
         "old_topics_keys": [
-            "microsoft,tools and technology,"
+            "microsoft,tools and technology,",
+            "windows"
         ],
         "original_key": "microsoft windows"
     },
@@ -1328,17 +1330,7 @@
     },
     "management,None": {
         "le_mapped_count": 80710,
-        "keywords": [
-            "senior management",
-            "managerial",
-            "manager training",
-            "management training",
-            "management skills",
-            "Manager's Performance Guide",
-            "management",
-            "Being a Director",
-            "Mentoring Techniques"
-        ],
+        "keywords": [],
         "stopwords": [],
         "ui_text": [
             "management"
@@ -1447,49 +1439,7 @@
     },
     "soft skills": {
         "le_mapped_count": 9872,
-        "keywords": [
-            "Personality Types",
-            "Personality Type",
-            "mbti",
-            "Staying Positive",
-            "Building Trust",
-            "myers briggs type indicator",
-            "people management",
-            "delegation strategies",
-            "managing people",
-            "assertiveness",
-            "facilitation skills",
-            "building relationships",
-            "conflict resolution",
-            "interpersonal skills",
-            "Meetings with Competitors",
-            "Meeting with Competitors",
-            "Challenging Conversations",
-            "people skills",
-            "teamwork",
-            "effective people",
-            "influencing skills",
-            "motivating",
-            "persuasion",
-            "conflict management",
-            "persuasive",
-            "perseverance",
-            "difficult conversations",
-            "mindfulness",
-            "highly effective people",
-            "public speaking",
-            "empathy",
-            "difficult people",
-            "coaching skills",
-            "Effective Relationships",
-            "soft skills",
-            "Unconscious Bias",
-            "Presentation skills",
-            "Presentation Design",
-            "Presentations",
-            "Body language",
-            "Manage Conflict"
-        ],
+        "keywords": [],
         "stopwords": [],
         "ui_text": [
             "soft skills"
@@ -2070,25 +2020,7 @@
     },
     "information technology,engineering,electrical engineering,": {
         "le_mapped_count": 0,
-        "keywords": [
-            "network security",
-            "data management",
-            "embedded systems",
-            "it entrepreneurship",
-            "software development",
-            "Internet Explorer",
-            "system administration",
-            "system analysis",
-            "web design",
-            "OneDrive",
-            "Google Documents",
-            "Google Docs",
-            "Google Drive",
-            "Google Maps",
-            "Drupal",
-            "Information Technology",
-            "application development"
-        ],
+        "keywords": [],
         "stopwords": [],
         "ui_text": [
             "information technology"
@@ -2196,7 +2128,7 @@
         ],
         "stopwords": [],
         "ui_text": [
-            "dreamweaver"
+            "adobe dreamweaver"
         ],
         "keywords_desc": [],
         "old_topics": [
@@ -4310,7 +4242,8 @@
     "front office": {
         "le_mapped_count": 578,
         "keywords": [
-            "front office"
+            "front office",
+            "Support Office"
         ],
         "stopwords": [],
         "ui_text": [
@@ -5241,20 +5174,6 @@
         "old_topics": [],
         "old_topics_keys": [],
         "original_key": "dancing"
-    },
-    "windows": {
-        "le_mapped_count": 21879,
-        "keywords": [
-            "windows"
-        ],
-        "stopwords": [],
-        "ui_text": [
-            "windows"
-        ],
-        "keywords_desc": [],
-        "old_topics": [],
-        "old_topics_keys": [],
-        "original_key": "windows"
     },
     "recruiting": {
         "le_mapped_count": 2484,
@@ -6536,15 +6455,7 @@
     },
     "creativity and innovation,None": {
         "le_mapped_count": 5309,
-        "keywords": [
-            "innovation",
-            "ideation",
-            "creative thinking",
-            "creativity",
-            "innovative",
-            "creativity and innovation",
-            "Creative Strategies"
-        ],
+        "keywords": [],
         "stopwords": [],
         "ui_text": [
             "creativity and innovation"
@@ -7680,21 +7591,10 @@
     },
     "trade life cycle": {
         "le_mapped_count": 0,
-        "keywords": [
-            "Order execution",
-            "Order initiation",
-            "Risk Management",
-            "Front Office",
-            "Middle Office",
-            "Back Office",
-            "Cash and Settlement",
-            "Order Matching",
-            "Order Routing",
-            "trade life cycle"
-        ],
+        "keywords": [],
         "stopwords": [],
         "ui_text": [
-            "trade life cycle"
+            "trade lifecycle"
         ],
         "keywords_desc": [],
         "old_topics": [],
@@ -7905,7 +7805,7 @@
         ],
         "stopwords": [],
         "ui_text": [
-            "certified information systems security professional (cissp)"
+            "CISSP"
         ],
         "keywords_desc": [],
         "old_topics": [],
@@ -8228,10 +8128,7 @@
     },
     "business,None": {
         "le_mapped_count": 30178,
-        "keywords": [
-            "business acumen",
-            "business"
-        ],
+        "keywords": [],
         "stopwords": [],
         "ui_text": [
             "business"
@@ -9223,7 +9120,7 @@
         ],
         "stopwords": [],
         "ui_text": [
-            "vba"
+            "Visual Basic (VBA)"
         ],
         "keywords_desc": [],
         "old_topics": [],

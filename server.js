@@ -11,9 +11,10 @@ const cors = require('cors')
 const JSZip = require("jszip");
 const XRegExp = require('xregexp');
 let zip = new JSZip();
-const mongoose = require('mongoose');
 
+const mongoose = require('mongoose');
 const le_lr = require('./model/le_lr')
+const topics_lr = require('./model/topics_lr')
 
 const app = express();
 // const webpack = require("webpack");
@@ -34,53 +35,117 @@ app.use(bodyParser.json())
 app.use(cookieParser())
 app.use(fileUpload())
 app.use(bodyParser.json());
+
 mongoose.connect('mongodb://lssinh033.sin.sap.corp:27017/lrdb', { useNewUrlParser: true, user:'lr', pass:'123123' });
 const connection = mongoose.connection;
 connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
 })
+
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.get("/dev", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "./public/index.html"))
-);
-
-app.get('/', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/build/index.html'));
+app.get('*', function(req, res) {
+    res.sendFile('index.html', {root: path.join(__dirname, './build/')});
 });
 
-app.get('/api/initData', function(req, res) {
-    const csvFilePath = fs.readFileSync("./mongo/all_items_DisneyTEST.csv", "utf8")
-    let keywordsFile = require('./mongo/topics_keywords_latest.json')
-    le_lr.find({}, function(err, docs) {
+app.post('/api/initData', function(req, res) {
+    topics_lr.find({}, (err, topics)=>{
         if (!err){ 
-            console.log(docs);
+            let keywordsJson = {}
+            topics.map(item=>keywordsJson[item.label] = {ui_text:item.ui_text[0],keywords:item.keywords})
+            le_lr.find({}, (err, doc) => {
+                if (!err){ 
+                    let tenant = doc.map(doc=>doc.tenant)
+                    tenant = [...new Set(tenant)]
+                    let tenants = []
+                    tenant.map(item=>tenants.push({id:item,label:item}))
+                    res.json({
+                        tenants:tenants,
+                        data: doc,
+                        keywordsJson: keywordsJson,
+                    })
+                } else {throw err;}
+            });
         } else {throw err;}
-    });
-    let keywordsJson = {}
-    let ordered = {}
-    Object.keys(keywordsFile).sort(Intl.Collator().compare).forEach(function(key) {
-        ordered[key] = keywordsFile[key];
     })
-    for (var key in ordered) {
-        if (ordered.hasOwnProperty(key)) {
-            keywordsJson[key] = {
-                ui_text:ordered[key].ui_text,
-                keywords:ordered[key].keywords,
-            }
+})
+
+app.post('/api/addKeywords', function(req, res) {
+    const keywords = req.body.keywords
+    const topic = req.body.topic
+    console.log(keywords+' >> '+topic)
+    topics_lr.updateOne(
+        { ui_text: topic }, 
+        { $push: { keywords: keywords } }, 
+        ()=>{
+            topics_lr.find({}, (err, topics)=>{
+                if (!err){ 
+                    let keywordsJson = {}
+                    topics.map(item=>keywordsJson[item.label] = {ui_text:item.ui_text[0],keywords:item.keywords})
+                    res.json({
+                        done:true,
+                        keywordsJson:keywordsJson,
+                    })
+                } else {throw err;}
+            })
+        }
+    );
+})
+
+app.post('/api/addTopic', function(req, res) {
+    
+    const keywords = req.body.keywords
+    const topic = req.body.topic
+    console.log(keywords+' >> '+topic)
+    var mongoose = require('mongoose');
+    var id = mongoose.Types.ObjectId();
+    topics_lr.create({
+        _id : id,
+        old_topics_keys : [],
+        original_key : '',
+        keywords : [keywords],
+        old_topics : [],
+        label : topic,
+        ui_text : [topic]
+    },()=>{
+        topics_lr.find({}, (err, topics)=>{
+            if (!err){ 
+                let keywordsJson = {}
+                topics.map(item=>keywordsJson[item.label] = {ui_text:item.ui_text[0],keywords:item.keywords})
+                res.json({
+                    done:true,
+                    keywordsJson:keywordsJson,
+                })
+            } else {throw err;}
+        })
+    });
+})
+
+app.post('/api/reloadData', function(req, res) {
+    let selectedType = []
+    for (var i in req.body.selectedType){
+        switch(req.body.selectedType[i]){
+            case '1 Algorithm':selectedType.push('1 - Topic determined by algorithm');break;
+            case '2 Subject Area':selectedType.push('2 - Topic unable to be determined – subject area used instead');break;
+            case '3 Undetermined':selectedType.push('3 - Topic calculated with low confidence score and no subject area available');break;
+            case 'Undefined':selectedType.push(null);break;
+            default:break
         }
     }
-    Papa.parse(csvFilePath, {
-        header: true,
-        skipEmptyLines: true,
-        complete: initData
-    })
-    function initData(results){
-        res.json({
-            data: results.data,
-            keywordsJson: keywordsJson,
-        })
-    }
+    const checkData = req.body.checkData
+    console.log(checkData)
+    le_lr.find({
+        $and: [
+            {'type': { $in: selectedType }},
+            {'tenant': { $in: req.body.selectedTenant }},
+            (checkData !== '')?{ 'title' : { '$regex' : checkData, '$options' : 'i' } }:{}
+        ]}, 
+        function (err, doc) {
+            if (!err){ 
+                res.json({data: doc})
+            } else {throw err;}
+        }
+    );
 })
 
 app.get('/api/loadNewItem/:index', function(req, res) {

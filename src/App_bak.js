@@ -24,7 +24,7 @@ registerPlugin();
 const EnhancedSwipeableViews = virtualize(SwipeableViews)
 const XRegExp = require('xregexp');
 
-class App extends Component {
+class AppItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -220,12 +220,12 @@ class App extends Component {
       keywords:this.state.keyword,
       characterSpace:this.state.characterSpace
     })
-      .then(res=>{
-        this.setState({
-          newKeyword:res.data.queryKeyword, 
-          queryData:res.data.queryData})
-      })
-      .catch(err=>console.log(err))
+    .then(res=>{
+      this.setState({
+        newKeyword:res.data.queryKeyword, 
+        queryData:res.data.queryData})
+    })
+    .catch(err=>console.log(err))
   }
   jsonUpdate(){
     this.setState({
@@ -586,4 +586,4 @@ class App extends Component {
       );
   }
 }
-export default process.env.NODE_ENV === "development" ? hot(module)(App) : App
+export default process.env.NODE_ENV === "development" ? hot(module)(AppItem) : AppItem

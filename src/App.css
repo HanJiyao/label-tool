@@ -20,7 +20,7 @@
   color: #61dafb;
 }
 body {
-  overflow: auto!important
+  overflow: auto!important;
 }
 .container{
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
@@ -40,7 +40,7 @@ body {
   display: none;
 }
 .react-select__input,.react-select__single-value{
-  font-weight: 500
+  font-weight: 500;
 }
 .react-select__input{
   height: 40px;
@@ -55,7 +55,7 @@ body {
   font-weight: 500
 }
 .selectTitle:hover {
-  color:#ff9800
+  color:#ff9800;
 }
 #refreshBtn{
   cursor: pointer;
@@ -79,13 +79,13 @@ body {
   color: #fff;
 }
 .input-field input[type=search]:focus {
-  color:#000
+  color:#000;
 }
 .bak .select-wrapper input.select-dropdown {
   border-bottom: 1px solid rgba(255,255,255,0.7);
 }
 .input-field input[type=number]:focus + label {
-  color: #fff!important
+  color: #fff!important;
 }
 .input-field input[type=number] {
   border-bottom: 1px solid rgba(255,255,255,0.7);
@@ -105,10 +105,10 @@ body {
   overflow: hidden!important;
 }
 .dropdown-content li span{
-  color:#5a5a5a!important
+  color:#5a5a5a!important;
 }
 .bak .select-wrapper .caret {
-  fill:white!important
+  fill:white!important;
 }
 #fileModal [type="checkbox"]:checked+span:not(.lever):before {
   border-right: 3px solid red;
@@ -134,54 +134,73 @@ body {
 #keywords:focus{
   box-shadow: none;
 }
+.new .input-field input[type=text]:focus {
+  border-bottom: 1px solid #ff9800!important;
+  box-shadow: 0 1px 0 0 #ff9800!important;
+}
+.new .input-field input[type=text]:focus + label {
+  color: #ff9800!important;
+}
+.new .input-field .prefix.active {
+  color: #ff9800!important;
+}
 @media only screen and (max-width: 1000px) {
   #checkBtn{
-    margin:1.5rem 0
+    margin:1.5rem 0;
   }
   .currentTopic{
     height: 157px!important;
   }
+  .new .input-field input {
+    margin-bottom: 20px!important;
+  }
+  .-pageSizeOptions{
+    display: none;
+  }
 }
 @media only screen and (max-width: 800px) {
   #cardContent{
-    padding-bottom:2rem!important
+    padding-bottom:2rem!important;
   }
   .card-content{
-    padding: 0!important
+    padding: 0!important;
   }
   .valign-wraper,.col.m8.s12{
-    padding-top: 0!important
+    padding-top: 0!important;
   }
   .tool-bar {
-    padding: 30px 8px 0 8px!important
+    padding: 20px 8px 0 8px!important;
   }
 }
 @media only screen and (min-width: 600px) {
   .statusCol{
-    width: 200px
+    width: 200px;
   }
   .fileSelectCol{
-    width:160px
+    width:160px;
   }
 }
 @media only screen and (max-width: 600px) {
   #editorModal{
-    width: 100%
+    width: 100%;
   }
   #cardContent{
     height: 100vh;
   }
   .container{
-    width:100%!important
+    width:100%!important;
   }
   .card .card-action {
     padding:12px 6px;
   }
   .card {
-    margin: 0!important
+    margin: 0!important;
   }
   .valign-wrapper.content-wrapper {
     height: calc(100vh - 150px);
-    min-height:500px
+    min-height:500px;
+  }
+  .ReactTable{
+    height: calc(100vh - 300px)!important;
   }
 }

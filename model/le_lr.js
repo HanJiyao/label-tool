@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const ObjectId = Schema.ObjectId;
 let le_lr = new Schema({
-    _id : String,
+    _id : ObjectId,
     topic : String,
     'complimentary topics' : String,
     title : String,
@@ -14,4 +15,4 @@ let le_lr = new Schema({
     entropy : String,
     sa_key : String
 });
-module.exports = mongoose.model('le_lr', le_lr);
+module.exports = mongoose.model("LearningItems", le_lr, "le_lr");

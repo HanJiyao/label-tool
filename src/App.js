@@ -9,9 +9,10 @@ import M from "materialize-css";
 import './App.css';
 import Table from './Table'
 import Editor from './Editor'
-import MSelect from './Select'
+import MSelect from './Tenant'
+import TypeSelect from './Type'
 
-class App extends Component {
+class App_bak extends Component {
     constructor() {
         super();
         this.state = {
@@ -21,65 +22,111 @@ class App extends Component {
             topic: '',
             keywords: '',
             checked:false,
-            tenants:[
-                {id:'CoastCapial',label:'CoastCapial'},
-                {id:'SAPLearningHub',label:'SAPLearningHub'},
-                {id:'Nedbank',label:'Nedbank'},
-            ],
+            tenants:[],
             selectedTenant:[],
+            type:[
+                {id:'1 Algorithm', label:'1 Algorithm'},
+                {id:'2 Subject Area', label:'2 Subject Area'},
+                {id:'3 Undetermined', label:'3 Undetermined'},
+                {id:'Undefined',label:'Undefined'},
+            ],
+            selectedType:['1 Algorithm','2 Subject Area','3 Undetermined','Undefined'],
+            reload:false,
             modified:false,
         };
         this.editJson = this.editJson.bind(this);
-        this.handleTopicChange = this.handleTopicChange.bind(this);
+        this.openAutocomplete = this.openAutocomplete.bind(this);
         this.changeTenant = this.changeTenant.bind(this);
+        this.changeType = this.changeType.bind(this);
+        this.reloadData = this.reloadData.bind(this);
+        this.addKeywords = this.addKeywords.bind(this);
     }
     componentDidMount() {
         this.setState({load:false})
-        axios.get('/api/initData/')
+        axios.post('/api/initData/')
         .then(res=>{
             const keywordsJson = res.data.keywordsJson
             this.setState({
                 load:true,
                 data: res.data.data,
+                tenants: res.data.tenants,
+                selectedTenant: res.data.tenants.map(item=>item.id)[0],
                 keywordsJson: keywordsJson,
             })
-            const options = {}
+            let options = {}
             for (var i in keywordsJson){
-                options[i] = null
+                options[keywordsJson[i].ui_text] = null
             }
             M.FormSelect.init(document.querySelectorAll('select', {}))
             M.Autocomplete.init(document.querySelectorAll('.autocomplete'), {
                 data:options
             });
+            M.Tooltip.init(document.querySelectorAll('.tooltipped'), options);
         })
         .catch(err=>console.log(err))
     }
     editJson(result){
         this.setState({keywordsJson:result.updated_src})
     }
-    handleTopicChange(selectedOption){
-        this.setState({
-          topic:selectedOption.label,
-          topicValue:selectedOption.value,
-          selectedOption:selectedOption
-        })
-    } 
-    handleCreate = (inputValue) => {
-        const createOption = (label) => ({
-            label,
-            value: label.toLowerCase().replace(/\W/g, ''),
-        });
-        const options = this.state.options;
-        const newOption = createOption(inputValue);
-        this.setState({
-            options: [...options, newOption],
-            selectedOption : newOption,
-            topic: newOption.label,
-            topicValue: newOption.value
-        });
+    openAutocomplete(){
+        console.log(M.Autocomplete.getInstance(document.querySelectorAll('.autocomplete')))
     }
     changeTenant(selectedTenant){
-        this.setState({selectedTenant:selectedTenant})
+        this.setState({selectedTenant:selectedTenant, reload:true})
+    }
+    changeType(selectedType){
+        this.setState({selectedType: selectedType, reload:true})
+    }
+    reloadData(e){
+        e.preventDefault();
+        this.setState({load:false})
+        const topic = document.getElementById('topic').value
+        const keywords = document.getElementById('keywords').value
+        axios.post('/api/reloadData',{
+            selectedTenant:this.state.selectedTenant,
+            selectedType:this.state.selectedType,
+            checkData: keywords
+        })
+        .then(res=>{
+            this.setState({
+                data:res.data.data, 
+                load:true, 
+                reload:false,
+                checked:(topic!==''&&keywords!=='')
+            })
+        })
+        .catch(err=>console.log(err))
+    }
+    addKeywords(){
+        this.setState({load:false})
+        let topicArr = []
+        let keywordsJson = this.state.keywordsJson
+        for (var i in keywordsJson){
+            topicArr.push(keywordsJson[i].ui_text)
+        }
+        const topic = document.getElementById('topic').value
+        const keywords = document.getElementById('keywords').value
+        if(topicArr.includes(topic)){
+            axios.post('/api/addKeywords',{
+                topic: topic,
+                keywords: keywords,
+            })
+            .then(res=>{this.setState({
+                load:res.data.done,
+                keywordsJson: res.data.keywordsJson,
+            })})
+            .catch(err=>console.log(err))
+        } else {
+            axios.post('/api/addTopic',{
+                topic: topic,
+                keywords: keywords,
+            })
+            .then(res=>{this.setState({
+                load:res.data.done,
+                keywordsJson: res.data.keywordsJson,
+            })})
+            .catch(err=>console.log(err))
+        }
     }
     render() {
         return (
@@ -106,12 +153,27 @@ class App extends Component {
                             </ul>
                         </div>
                         <div class="bak nav-content orange">
-                            <div className="row tool-bar" style={{margin:"0",padding:"30px 50px 0 50px"}}>
+                            <div className="row tool-bar" style={{margin:"0",padding:"1.5rem 0.5rem 0"}}>
+                                <TypeSelect 
+                                    elems={this.state.type} 
+                                    selectedType={this.state.selectedType} 
+                                    changeType={this.changeType}
+                                />
                                 <MSelect 
                                     elems={this.state.tenants} 
                                     selectedTenant={this.state.selectedTenant} 
                                     changeTenant={this.changeTenant}
+                                    updateTenants={this.updateTenants}
                                 />
+                                <button className="col s1 m1 btn-flat" style={{color:'white',height:'100%'}} disabled={!this.state.reload}>
+                                    <i id="refreshBtn" 
+                                        style={{fontSize:"2rem"}}
+                                        className="material-icons tooltipped"
+                                        onClick={this.reloadData}
+                                        data-position="top" data-tooltip="Reload entire data"
+                                        >done
+                                    </i>
+                                </button>
                             </div>
                             <Editor 
                                 keywordsJson = {this.state.keywordsJson} 
@@ -119,43 +181,51 @@ class App extends Component {
                             />    
                         </div>
                     </nav>
-                    <div className="content-wrapper" style={{textAlign:'left'}}>
-                        <Table style={{padding:'20px'}} data = {this.state.data}/>
-                        <div style={{textAlign:"left",paddingTop:"0",borderTop:"1px solid rgba(160,160,160,0.2)",margin:"0"}}>
-                            <div className="row" style={this.state.correct ? {display:'none'} : {padding:"1.5rem .5rem",margin:"0"}}>
+                    <div className="content-wrapper new" style={{textAlign:'left'}}>
+                        <Table 
+                            style = {{padding:'20px'}} 
+                            data = {this.state.data} 
+                        />
+                        <div style={{textAlign:"left",paddingTop:"0",margin:"0"}}>
+                            <form className="row" style={{padding:"1.5rem .5rem",margin:"0"}}
+                                onSubmit={this.reloadData}>
                                 <div class="input-field col s6 l3" style={{marginTop:'.2rem',marginBottom:'0'}}>
-                                    <i class="material-icons prefix">keyboard_arrow_right</i>
-                                    <input type="text" id="autocomplete-input" className="autocomplete" autocomplete="false"/>
-                                    <label for="autocomplete-input">Topic</label>
+                                    <i class="material-icons prefix" 
+                                        onClick={this.openAutocomplete}>keyboard_arrow_right</i>
+                                    <input type="text" id="topic" className="autocomplete" autocomplete="off"/>
+                                    <label for="topic">Topic</label>
                                 </div>
                                 <div class="input-field col s6 l3" style={{marginTop:'.2rem',marginBottom:'0'}}>
                                     <input id="keywords" type="text" />
                                     <label for="keywords">Keywords</label>
                                 </div>
-                                <div className="col s6 l2">
+                                <div className="col s4 l2">
                                     <button id="queryBtn"
-                                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600"}} 
-                                    className='waves-effect waves-light btn-large orange'
-                                    onClick={this.checkData}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">search</i>check
+                                        type='submit'
+                                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600",padding:'0 15px'}} 
+                                        className='waves-effect waves-light btn-large orange'>
+                                        <i style={{fontWeight:"900",margin:"0"}} className="material-icons left">search</i>check
                                     </button>
                                 </div>
-                                <div className="col s6 l2">
+                                <div className="col s4 l2">
                                     <button id="addBtn"
-                                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600"}} 
-                                    className='waves-effect waves-light btn-large orange' 
-                                    disabled={!this.state.checked}
-                                    onClick={this.addKeywords}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">add</i>add
+                                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600",padding:'0 15px'}} 
+                                        type="button"
+                                        className='waves-effect waves-light btn-large orange' 
+                                        disabled={!this.state.checked}
+                                        onClick={this.addKeywords}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">add</i>add
                                     </button>
                                 </div>
-                                <div className="col s6 l2">
+                                <div className="col s4 l2">
                                     <button id="trainBtn"
-                                    style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600"}} 
-                                    className='waves-effect waves-light btn-large orange'
-                                    disabled={!this.state.modified}
-                                    onClick={this.checkData}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">check</i>train
+                                        style={{width:"100%",borderRadius:'100px',zIndex:"0",fontSize:"1.2rem",fontWeight:"600",padding:'0 15px'}} 
+                                        type="button"
+                                        className='waves-effect waves-light btn-large orange'
+                                        disabled={!this.state.modified}
+                                        onClick={this.trainData}><i style={{fontWeight:"900",margin:"0"}} className="material-icons left">check</i>train
                                     </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -163,4 +233,4 @@ class App extends Component {
         );
     }
 }
-export default App
+export default App_bak

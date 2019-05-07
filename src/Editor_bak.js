@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import M from "materialize-css";
 import ReactJson from 'react-json-view'
-import { Scrollbars } from 'react-custom-scrollbars';
 class Editor extends Component {
   constructor(props) {
     super(props);
