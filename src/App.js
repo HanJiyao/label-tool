@@ -19,8 +19,6 @@ class App_bak extends Component {
             load:true,
             data: [],
             keywordsJson:{},
-            topic: '',
-            keywords: '',
             checked:false,
             tenants:[],
             selectedTenant:[],
@@ -30,11 +28,11 @@ class App_bak extends Component {
                 {id:'3 Undetermined', label:'3 Undetermined'},
                 {id:'Undefined',label:'Undefined'},
             ],
-            selectedType:['1 Algorithm','2 Subject Area','3 Undetermined','Undefined'],
+            selectedType:[],
             reload:false,
             modified:false,
         };
-        this.editJson = this.editJson.bind(this);
+        this.deleteJson = this.deleteJson.bind(this);
         this.openAutocomplete = this.openAutocomplete.bind(this);
         this.changeTenant = this.changeTenant.bind(this);
         this.changeType = this.changeType.bind(this);
@@ -43,45 +41,70 @@ class App_bak extends Component {
     }
     componentDidMount() {
         this.setState({load:false})
-        axios.post('/api/initData/')
+        const selectedTenant = localStorage.getItem("selectedTenant")
+        const selectedType = localStorage.getItem("selectedType")
+        axios.post('/api/initData/', {
+            selectedTenant: selectedTenant,
+            selectedType: selectedType
+        })
         .then(res=>{
             const keywordsJson = res.data.keywordsJson
             this.setState({
                 load:true,
                 data: res.data.data,
                 tenants: res.data.tenants,
-                selectedTenant: res.data.tenants.map(item=>item.id)[0],
+                selectedTenant: res.data.selectedTenant,
+                selectedType: res.data.selectedType,
                 keywordsJson: keywordsJson,
+            }, ()=>{
+                let options = {}
+                Object.keys(this.state.keywordsJson).map(item=>options[item] = null)
+                M.FormSelect.init(document.querySelectorAll('select', {}))
+                M.Autocomplete.init(document.querySelectorAll('.autocomplete'), {data:options});
+                M.Tooltip.init(document.querySelectorAll('.tooltipped'), options);
             })
-            let options = {}
-            for (var i in keywordsJson){
-                options[keywordsJson[i].ui_text] = null
-            }
-            M.FormSelect.init(document.querySelectorAll('select', {}))
-            M.Autocomplete.init(document.querySelectorAll('.autocomplete'), {
-                data:options
-            });
-            M.Tooltip.init(document.querySelectorAll('.tooltipped'), options);
         })
         .catch(err=>console.log(err))
     }
-    editJson(result){
-        this.setState({keywordsJson:result.updated_src})
+    deleteJson(result){
+        let topic = ''
+        let keywords = ''
+        const keywordsJson = this.state.keywordsJson
+        if (result.namespace.length===0){
+            topic = result.name
+        } else {
+            topic = result.namespace[0]
+            keywords = keywordsJson[result.namespace[0]][parseInt(result.name)]
+        }
+        this.setState({keywordsJson:result.updated_src, load:false}, ()=>{
+            axios.post('/api/delete',{
+                topic: topic,
+                keywords: keywords,
+            })
+            .then(res=>{this.setState({
+                load:res.data.done
+            })})
+            .catch(err=>console.log(err))
+        })
     }
     openAutocomplete(){
         console.log(M.Autocomplete.getInstance(document.querySelectorAll('.autocomplete')))
     }
     changeTenant(selectedTenant){
+        localStorage.setItem('selectedTenant', selectedTenant)
         this.setState({selectedTenant:selectedTenant, reload:true})
     }
     changeType(selectedType){
+        localStorage.setItem('selectedType', selectedType)
         this.setState({selectedType: selectedType, reload:true})
     }
     reloadData(e){
-        e.preventDefault();
+        if (e!==undefined){
+            e.preventDefault();
+        }
         this.setState({load:false})
-        const topic = document.getElementById('topic').value
-        const keywords = document.getElementById('keywords').value
+        const topic = document.getElementById('topic').value.trim()
+        const keywords = document.getElementById('keywords').value.trim()
         axios.post('/api/reloadData',{
             selectedTenant:this.state.selectedTenant,
             selectedType:this.state.selectedType,
@@ -99,21 +122,21 @@ class App_bak extends Component {
     }
     addKeywords(){
         this.setState({load:false})
-        let topicArr = []
         let keywordsJson = this.state.keywordsJson
-        for (var i in keywordsJson){
-            topicArr.push(keywordsJson[i].ui_text)
-        }
-        const topic = document.getElementById('topic').value
-        const keywords = document.getElementById('keywords').value
+        let topicArr = Object.keys(keywordsJson)
+        const topic = document.getElementById('topic').value.trim()
+        const keywords = document.getElementById('keywords').value.trim()
         if(topicArr.includes(topic)){
             axios.post('/api/addKeywords',{
                 topic: topic,
                 keywords: keywords,
             })
             .then(res=>{this.setState({
-                load:res.data.done,
-                keywordsJson: res.data.keywordsJson,
+                keywordsJson: res.data.keywordsJson
+            }, ()=>{
+                document.getElementById('topic').value = ''
+                document.getElementById('keywords').value = ''
+                this.reloadData()
             })})
             .catch(err=>console.log(err))
         } else {
@@ -122,8 +145,11 @@ class App_bak extends Component {
                 keywords: keywords,
             })
             .then(res=>{this.setState({
-                load:res.data.done,
-                keywordsJson: res.data.keywordsJson,
+                keywordsJson: res.data.keywordsJson
+            }, ()=>{
+                document.getElementById('topic').value = ''
+                document.getElementById('keywords').value = ''
+                this.reloadData()
             })})
             .catch(err=>console.log(err))
         }
@@ -171,13 +197,13 @@ class App_bak extends Component {
                                         className="material-icons tooltipped"
                                         onClick={this.reloadData}
                                         data-position="top" data-tooltip="Reload entire data"
-                                        >done
-                                    </i>
+                                    >done</i>
                                 </button>
                             </div>
                             <Editor 
                                 keywordsJson = {this.state.keywordsJson} 
-                                editJson = {this.editJson}
+                                deleteJson = {this.deleteJson}
+                                saveJson = {this.saveJson}
                             />    
                         </div>
                     </nav>
@@ -192,7 +218,7 @@ class App_bak extends Component {
                                 <div class="input-field col s6 l3" style={{marginTop:'.2rem',marginBottom:'0'}}>
                                     <i class="material-icons prefix" 
                                         onClick={this.openAutocomplete}>keyboard_arrow_right</i>
-                                    <input type="text" id="topic" className="autocomplete" autocomplete="off"/>
+                                    <input type="text" id="topic" className="autocomplete" autocomplete="off" />
                                     <label for="topic">Topic</label>
                                 </div>
                                 <div class="input-field col s6 l3" style={{marginTop:'.2rem',marginBottom:'0'}}>

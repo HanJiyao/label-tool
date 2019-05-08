@@ -5,7 +5,7 @@ import gitImg from './git.png'
 import './App.css';
 import Modal from './Modal'
 import MSelect from './Select'
-import Editor from './Editor'
+import Editor from './Editor_bak'
 import FileMgr from './FileMgr'
 import Select from 'react-select';
 import axios from 'axios';
@@ -122,7 +122,7 @@ class AppItem extends Component {
   }
   loadNewItem(){
     this.setState({dataModified:false})
-    axios.get('/api/loadNewItem/'+this.state.index)
+    axios.post('/api/loadNewItem/', {index:this.state.index})
     .then(res=>{
       let topic = res.data.topic
       this.setState({

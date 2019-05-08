@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import M from "materialize-css";
 import ReactJson from 'react-json-view'
+import { Scrollbars } from 'react-custom-scrollbars';
 class Editor extends Component {
   constructor(props) {
     super(props);
@@ -33,6 +34,10 @@ class Editor extends Component {
           style={{maxHeight:"100%",fontSize:"12.5px"}}>
           <div className="modal-content left-align" style={{background:"rgb(29, 31, 33)"}} id="jsonEditor">
             {this.state.display?
+            <Scrollbars
+            autoHide
+            autoHideTimeout={1000}
+            autoHideDuration={200}>
               <ReactJson 
                 src={this.props.keywordsJson} 
                 theme="google"
@@ -41,6 +46,7 @@ class Editor extends Component {
                 onAdd={this.props.editJson}
                 onDelete={this.props.editJson}
               />
+            </Scrollbars>
             :<h5 className="center-align white-text"> Loading • • • </h5>}
           </div>
           <div className="modal-footer" style={{background:"rgb(29, 31, 33)"}}>

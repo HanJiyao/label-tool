@@ -29,29 +29,18 @@ class Editor extends Component {
           <i className="material-icons left">edit</i>
         </button>
         <div
-          ref={EditorModal => {this.EditorModal = EditorModal}} id="editorModal" className="modal modal-fixed-footer"
+          ref={EditorModal => {this.EditorModal = EditorModal}} id="editorModal" className="modal"
           style={{maxHeight:"100%",fontSize:"12.5px"}}>
-          <div className="modal-content left-align" style={{background:"rgb(29, 31, 33)"}} id="jsonEditor">
+          <div className="modal-content left-align" style={{background:"rgb(29, 31, 33)",minHeight:'100%'}} id="jsonEditor">
             {this.state.display?
               <ReactJson 
                 src={this.props.keywordsJson} 
                 theme="google"
                 displayDataTypes={false}
                 enableClipboard={false}
-                onEdit={this.props.editJson}
-                onDelete={this.props.editJson}
+                onDelete={this.props.deleteJson}
               />
             :<h5 className="center-align white-text"> Loading • • • </h5>}
-          </div>
-          <div className="modal-footer" style={{background:"rgb(29, 31, 33)"}}>
-            <button type="submit" className="modal-close waves-effect waves btn" style={{ background: "rgb(57, 113, 237)", borderRadius: '100px'}}>
-              <i className="material-icons left" style={{lineHeight:"1.5"}}>
-                save
-              </i> save
-            </button>
-            <button className="modal-close waves-effect waves-grey btn-flat white-text">
-              Cancel
-            </button>
           </div>
         </div>
       </>
