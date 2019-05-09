@@ -1,0 +1,17 @@
+[Unit]
+Description=Node.js Tool Server
+
+[Service]
+ExecStart=/usr/local/bin/node /usr/src/lr_topics_tool/server.js
+WorkingDirectory=/usr/src/lr_topics_tool
+Restart=always
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+# Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=nodejs-example
+Environment=NODE_ENV=production PORT=2233
+
+[Install]
+WantedBy=multi-user.target

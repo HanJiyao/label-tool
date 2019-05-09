@@ -38,6 +38,7 @@ class Editor extends Component {
                 theme="google"
                 displayDataTypes={false}
                 enableClipboard={false}
+                onEdit={this.props.editJson}
                 onDelete={this.props.deleteJson}
               />
             :<h5 className="center-align white-text"> Loading • • • </h5>}

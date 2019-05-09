@@ -49,60 +49,60 @@ app.get('*', function(req, res) {
 });
 
 app.post('/api/initData', function(req, res) {
-        let tenant = 
-            [ 'CoastCapital',
-            'SAPLearningHub',
-            'Nedbank',
-            'Mondelez',
-            'Disney',
-            'Ahold',
-            'Specsavers',
-            'Hersheys',
-            'Barclays',
-            'Energizer' ]
-        let tenants = []
-        tenant.map(item=>tenants.push({id:item,label:item}))
-        let selectedType, selectedTypeUI =  ['1 Algorithm','2 Subject Area','3 Undetermined','Undefined']
-        if (req.body.selectedType!==null){
-            let storage = req.body.selectedType.split(',')
-            selectedType = []
-            for (var i in storage){
-                switch(storage[i]){
-                    case '1 Algorithm':selectedType.push('1 - Topic determined by algorithm');break;
-                    case '2 Subject Area':selectedType.push('2 - Topic unable to be determined – subject area used instead');break;
-                    case '3 Undetermined':selectedType.push('3 - Topic calculated with low confidence score and no subject area available');break;
-                    case 'Undefined':selectedType.push(null);break;
-                    default:break
-                }
+    let tenant = 
+        [ 'CoastCapital',
+        'SAPLearningHub',
+        'Nedbank',
+        'Mondelez',
+        'Disney',
+        'Ahold',
+        'Specsavers',
+        'Hersheys',
+        'Barclays',
+        'Energizer' ]
+    let tenants = []
+    tenant.map(item=>tenants.push({id:item,label:item}))
+    let selectedType, selectedTypeUI =  ['1 Algorithm','2 Subject Area','3 Undetermined','Undefined']
+    if (req.body.selectedType!==null){
+        let storage = req.body.selectedType.split(',')
+        selectedType = []
+        for (var i in storage){
+            switch(storage[i]){
+                case '1 Algorithm':selectedType.push('1 - Topic determined by algorithm');break;
+                case '2 Subject Area':selectedType.push('2 - Topic unable to be determined – subject area used instead');break;
+                case '3 Undetermined':selectedType.push('3 - Topic calculated with low confidence score and no subject area available');break;
+                case 'Undefined':selectedType.push(null);break;
+                default:break
             }
-            selectedTypeUI = storage
-        } 
-        let tenantCondition = (req.body.selectedTenant!==null)?{'tenant': { $in: req.body.selectedTenant.split(',') }}:{}
-        let typeCondition = (req.body.selectedType!==null)?{'type': { $in: selectedType }}:{}
-        console.log(typeCondition, tenantCondition)
-        topics_lr.find({}, (err, topics)=>{
-            if (!err){ 
-                let keywordsJson = {}
-                topics.map(item=>keywordsJson[item.ui_text[0]] = item.keywords)
-                le_lr.find({$and:[tenantCondition, typeCondition]}, (err, doc) => {
-                    if (!err){ 
-                        let selectedTenant = []
-                        if(req.body.selectedTenant!==null){
-                            selectedTenant = req.body.selectedTenant.split(',')
-                        } else {
-                            selectedTenant = tenant
-                        }
-                        res.json({
-                            tenants: tenants,
-                            selectedTenant: selectedTenant,
-                            selectedType: selectedTypeUI,
-                            data: doc,
-                            keywordsJson: keywordsJson,
-                        })
-                    } else {throw err}
-                });
-            } else {throw err;}
-        })
+        }
+        selectedTypeUI = storage
+    } 
+    let tenantCondition = (req.body.selectedTenant!==null)?{'tenant': { $in: req.body.selectedTenant.split(',') }}:{}
+    let typeCondition = (req.body.selectedType!==null)?{'type': { $in: selectedType }}:{}
+    console.log(typeCondition, tenantCondition)
+    topics_lr.find({}, (err, topics)=>{
+        if (!err){ 
+            let keywordsJson = {}
+            topics.map(item=>keywordsJson[item.label]={ui_text:item.ui_text[0],keywords:item.keywords})
+            le_lr.find({$and:[tenantCondition, typeCondition]}, (err, doc) => {
+                if (!err){ 
+                    let selectedTenant = []
+                    if(req.body.selectedTenant!==null){
+                        selectedTenant = req.body.selectedTenant.split(',')
+                    } else {
+                        selectedTenant = tenant
+                    }
+                    res.json({
+                        tenants: tenants,
+                        selectedTenant: selectedTenant,
+                        selectedType: selectedTypeUI,
+                        data: doc,
+                        keywordsJson: keywordsJson,
+                    })
+                } else {throw err}
+            });
+        } else {throw err;}
+    })
 })
 
 app.post('/api/addKeywords', function(req, res) {
@@ -116,7 +116,7 @@ app.post('/api/addKeywords', function(req, res) {
             topics_lr.find({}, (err, topics)=>{
                 if (!err){ 
                     let keywordsJson = {}
-                    topics.map(item=>keywordsJson[item.ui_text[0]] = item.keywords)
+                    topics.map(item=>keywordsJson[item.label]={ui_text:item.ui_text[0],keywords:item.keywords})
                     res.json({
                         done:true,
                         keywordsJson:keywordsJson,
@@ -144,7 +144,7 @@ app.post('/api/addTopic', function(req, res) {
         topics_lr.find({}, (err, topics)=>{
             if (!err){ 
                 let keywordsJson = {}
-                topics.map(item=>keywordsJson[item.ui_text[0]] = item.keywords)
+                topics.map(item=>keywordsJson[item.label]={ui_text:item.ui_text[0],keywords:item.keywords})
                 res.json({
                     done:true,
                     keywordsJson:keywordsJson,
@@ -166,7 +166,6 @@ app.post('/api/reloadData', function(req, res) {
         }
     }
     const checkData = req.body.checkData
-    console.log(checkData)
     le_lr.find({
         $and: [
             {'type': { $in: selectedType }},
@@ -184,9 +183,8 @@ app.post('/api/reloadData', function(req, res) {
 app.post('/api/delete', function(req, res) {
     let topic = req.body.topic
     let keywords = req.body.keywords
-    console.log(req.body.topic)
     if (keywords === ''){
-        topics_lr.deleteOne({ui_text: topic},()=>{
+        topics_lr.deleteOne({label: topic},()=>{
             topics_lr.find({}, (err, topics)=>{
                 if (!err){ 
                     res.json({
@@ -197,7 +195,7 @@ app.post('/api/delete', function(req, res) {
         });
     } else {
         topics_lr.updateOne(
-            { ui_text: topic },
+            { label: topic },
             { $pull: { keywords: keywords}}, ()=>{
             topics_lr.find({}, (err, topics)=>{
                 if (!err){ 
@@ -207,6 +205,33 @@ app.post('/api/delete', function(req, res) {
                 } else {throw err;}
             })
         });
+    }    
+})
+
+app.post('/api/edit', function(req,res) {
+    if (req.body.field==='keywords') {
+        topics_lr.updateOne(
+            {'label':req.body.topic,'keywords':req.body.existKeyword},
+            {$set:{'keywords.$':req.body.keyword}}, (err, topics)=>{
+                if (!err){ 
+                    res.json({
+                        done:true,
+                    })
+                } else {throw err;}
+            }
+        )
+    }
+    else {
+        topics_lr.updateOne(
+            {'label':req.body.topic,'ui_text':req.body.existKeyword},
+            {$set:{'ui_text.$':req.body.keyword}}, (err, topics)=>{
+                if (!err){ 
+                    res.json({
+                        done:true,
+                    })
+                } else {throw err;}
+            }
+        )
     }
     
 })

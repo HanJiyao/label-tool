@@ -33,6 +33,7 @@ class App_bak extends Component {
             modified:false,
         };
         this.deleteJson = this.deleteJson.bind(this);
+        this.editJson = this.editJson.bind(this);
         this.openAutocomplete = this.openAutocomplete.bind(this);
         this.changeTenant = this.changeTenant.bind(this);
         this.changeType = this.changeType.bind(this);
@@ -58,7 +59,9 @@ class App_bak extends Component {
                 keywordsJson: keywordsJson,
             }, ()=>{
                 let options = {}
-                Object.keys(this.state.keywordsJson).map(item=>options[item] = null)
+                for (var i in this.state.keywordsJson){
+                    options[this.state.keywordsJson[i].ui_text] = null
+                }
                 M.FormSelect.init(document.querySelectorAll('select', {}))
                 M.Autocomplete.init(document.querySelectorAll('.autocomplete'), {data:options});
                 M.Tooltip.init(document.querySelectorAll('.tooltipped'), options);
@@ -69,17 +72,31 @@ class App_bak extends Component {
     deleteJson(result){
         let topic = ''
         let keywords = ''
-        const keywordsJson = this.state.keywordsJson
-        if (result.namespace.length===0){
-            topic = result.name
-        } else {
+        if (result.namespace[1]==='keywords'){
             topic = result.namespace[0]
-            keywords = keywordsJson[result.namespace[0]][parseInt(result.name)]
+            keywords = result.existing_value
+        } else {
+            topic = result.name
         }
         this.setState({keywordsJson:result.updated_src, load:false}, ()=>{
             axios.post('/api/delete',{
                 topic: topic,
                 keywords: keywords,
+            })
+            .then(res=>{this.setState({
+                load:res.data.done
+            })})
+            .catch(err=>console.log(err))
+        })
+    }
+    editJson(result){
+        this.setState({keywordsJson:result.updated_src, load:false}, ()=>{
+            axios.post('/api/edit',{
+                index: result.name,
+                existKeyword: result.existing_value,
+                keyword: result.new_value,
+                topic: result.namespace[0],
+                field: result.namespace[1],
             })
             .then(res=>{this.setState({
                 load:res.data.done
@@ -123,7 +140,8 @@ class App_bak extends Component {
     addKeywords(){
         this.setState({load:false})
         let keywordsJson = this.state.keywordsJson
-        let topicArr = Object.keys(keywordsJson)
+        let topicArr = []
+        for (var i in keywordsJson) { topicArr.push(keywordsJson[i].ui_text) }
         const topic = document.getElementById('topic').value.trim()
         const keywords = document.getElementById('keywords').value.trim()
         if(topicArr.includes(topic)){
@@ -203,7 +221,7 @@ class App_bak extends Component {
                             <Editor 
                                 keywordsJson = {this.state.keywordsJson} 
                                 deleteJson = {this.deleteJson}
-                                saveJson = {this.saveJson}
+                                editJson = {this.editJson}
                             />    
                         </div>
                     </nav>
