@@ -36,6 +36,12 @@ app.use(cookieParser())
 app.use(fileUpload())
 app.use(bodyParser.json());
 
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+
+// setup the logger
+app.use(logger('combined', { stream: accessLogStream }))
+
 mongoose.connect('mongodb://lssinh033.sin.sap.corp:27017/lrdb', { useNewUrlParser: true, user:'lr', pass:'123123' });
 const connection = mongoose.connection;
 connection.once('open', function() {
