@@ -144,6 +144,9 @@ body {
 .new .input-field .prefix.active {
   color: #ff9800!important;
 }
+.ReactTable .rt-td {
+  white-space: unset
+}
 @media only screen and (max-width: 1000px) {
   #checkBtn{
     margin:1.5rem 0;

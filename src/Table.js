@@ -20,7 +20,7 @@ class Table extends Component {
                         id: "title",
                         accessor: d => d.title,
                         filterMethod: (filter, rows) =>
-                            matchSorter(rows, filter.value, { keys: ["title"] }),
+                            matchSorter(rows, filter.value, { minRanking: matchSorter.rankings.CONTAINS, keys: ["title"] }),
                         filterAll: true
                     },
                     {
@@ -28,7 +28,7 @@ class Table extends Component {
                         id: "description",
                         accessor: d => d.description,
                         filterMethod: (filter, rows) =>
-                            matchSorter(rows, filter.value, { keys: ["description"] }),
+                            matchSorter(rows, filter.value, { minRanking: matchSorter.rankings.CONTAINS, keys: ["description"] }),
                         filterAll: true
                     }
                     ]
@@ -41,7 +41,7 @@ class Table extends Component {
                         id: "topic",
                         accessor: d => d.topic,
                         filterMethod: (filter, rows) =>
-                            matchSorter(rows, filter.value, { keys: ["topic"] }),
+                            matchSorter(rows, filter.value, { minRanking: matchSorter.rankings.CONTAINS, keys: ["topic"] }),
                         filterAll: true
                     },
                     {

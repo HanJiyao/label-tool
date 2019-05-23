@@ -34,6 +34,16 @@ Manual edit JSON by top right corner button make the review and revert of change
 
 ### Docker
 
+### docker screen
+
+screen session `lr_topics_tool`
+```
+screen -r lr_topics_tool 
+```
+resume screen
+
+ctrl+A+D to exit
+
 Source location at `/home/lr_topics/lr_topics_tool`
 
 Docker image & process name `lr_tool`
