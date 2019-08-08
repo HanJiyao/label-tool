@@ -147,6 +147,9 @@ body {
 .ReactTable .rt-td {
   white-space: unset
 }
+.filepond--root {
+  margin: 0!important;
+}
 @media only screen and (max-width: 1000px) {
   #checkBtn{
     margin:1.5rem 0;
@@ -162,12 +165,6 @@ body {
   }
 }
 @media only screen and (max-width: 800px) {
-  #cardContent{
-    padding-bottom:2rem!important;
-  }
-  .card-content{
-    padding: 0!important;
-  }
   .valign-wraper,.col.m8.s12{
     padding-top: 0!important;
   }
@@ -184,6 +181,12 @@ body {
   }
 }
 @media only screen and (max-width: 600px) {
+  #cardContent{
+    padding-bottom:2rem!important;
+  }
+  .card-content{
+    padding: 0!important;
+  }
   #editorModal{
     width: 100%;
   }
@@ -205,5 +208,8 @@ body {
   }
   .ReactTable{
     height: calc(100vh - 300px)!important;
+  }
+  .filepond--wrapper {
+    display: none;
   }
 }

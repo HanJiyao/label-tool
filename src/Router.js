@@ -10,12 +10,12 @@ class MainRouter extends Component {
     render() {
         return (
             <Router>
-                <div class="fixed-action-btn">
+                {/* <div class="fixed-action-btn">
                     <Link to="/" class="btn-floating btn-large red"><i class="large material-icons">list</i></Link>
                     <ul>
                         <li><Link to="/item" class="btn-floating red"><i class="material-icons">rate_review</i></Link></li>
                     </ul>
-                </div>
+                </div> */}
                 <Route exact path="/" component={Home} />
                 <Route path="/item" component={Item} />
             </Router>

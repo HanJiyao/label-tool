@@ -11,6 +11,7 @@ import Table from './Table'
 import Editor from './Editor'
 import MSelect from './Tenant'
 import TypeSelect from './Type'
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 
 class App_bak extends Component {
     constructor() {
@@ -185,6 +186,7 @@ class App_bak extends Component {
                         <div class="nav-wrapper orange">
                             <ul style={{position:"absolute",top:"0",right:"0"}}>
                                 <li className="hide-on-med-and-up"><a className="modal-trigger" data-target="editorModal"><i className="material-icons" style={{paddingTop: "3.6px"}}>edit</i></a></li>
+                                <li><Link to="/item"><i class="material-icons" style={{paddingTop: "3.6px"}}>rate_review</i></Link></li>
                                 <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
                                 <li>
                                     <a  href="https://github.wdf.sap.corp/ML-Leonardo/ML-SFSF-LearningRecommendations/tree/master/research/topics/lr_topics_tool" 
@@ -197,7 +199,7 @@ class App_bak extends Component {
                             </ul>
                         </div>
                         <div class="bak nav-content orange">
-                            <div className="row tool-bar" style={{margin:"0",padding:"1.5rem 0.5rem 0"}}>
+                            <div className="row tool-bar" style={{margin:"0",padding:"30px 50px 0"}}>
                                 <TypeSelect 
                                     elems={this.state.type} 
                                     selectedType={this.state.selectedType} 

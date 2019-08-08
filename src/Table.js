@@ -13,7 +13,7 @@ class Table extends Component {
                     String(row[filter.id]) === filter.value}
                 columns={[
                 {
-                    Header: "Learning item",
+                    Header: "Learning Items",
                     columns: [
                     {
                         Header: "Title",
@@ -21,7 +21,8 @@ class Table extends Component {
                         accessor: d => d.title,
                         filterMethod: (filter, rows) =>
                             matchSorter(rows, filter.value, { minRanking: matchSorter.rankings.CONTAINS, keys: ["title"] }),
-                        filterAll: true
+                        filterAll: true,
+                        width: 250
                     },
                     {
                         Header: "Description",
@@ -34,7 +35,7 @@ class Table extends Component {
                     ]
                 },
                 {
-                    Header: "Prediction",
+                    Header: "Predictions",
                     columns: [
                     {
                         Header: "Topic",
@@ -42,18 +43,20 @@ class Table extends Component {
                         accessor: d => d.topic,
                         filterMethod: (filter, rows) =>
                             matchSorter(rows, filter.value, { minRanking: matchSorter.rankings.CONTAINS, keys: ["topic"] }),
-                        filterAll: true
+                        filterAll: true,
+                        width: 150
                     },
                     {
                         Header: "Score",
                         accessor: "entropy",
+                        width: 150
                     }
                     ]
                 }
                 ]}
                 defaultPageSize={20}
                 style={{
-                height: "666px" 
+                height: "calc(95vh - 272.55px)" 
                 }}
                 className="-striped -highlight"
             />

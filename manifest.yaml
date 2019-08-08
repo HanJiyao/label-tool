@@ -1,0 +1,7 @@
+---
+applications:
+- name: topic-annotation-dev-hjy
+  random-route: false
+  path: .
+  memory: 1024M
+  command: npm run server

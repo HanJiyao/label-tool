@@ -19,6 +19,7 @@ import SwipeableViews from 'react-swipeable-views'
 import virtualize from 'react-swipeable-views-utils/lib/virtualize'
 import { Scrollbars } from 'react-custom-scrollbars';
 import { Swipeable } from 'react-swipeable'
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 registerPlugin();
 
 const EnhancedSwipeableViews = virtualize(SwipeableViews)
@@ -442,10 +443,11 @@ class AppItem extends Component {
                 <ul style={{position:"absolute",top:"0",right:"0"}}>
                   <li className="hide-on-med-and-up"><a className="modal-trigger" data-target="editorModal"><i className="material-icons" style={{paddingTop: "3.6px"}}>edit</i></a></li>
                   <li><FileMgr items = {this.state.items} selectedFiles = {this.state.selectedFiles} deleteFile = {this.deleteFile} /></li>
-                  <li>
+                  {/* <li>
                       {(this.state.animation)?<a style={{paddingTop: "3.6px"}} onClick={()=>this.setState({animation:false})}><i class="material-icons">cancel_presentation</i></a>
                       :<a style={{paddingTop: "3.6px"}} onClick={()=>this.setState({animation:true})}><i class="material-icons">input</i></a>}
-                  </li>
+                  </li> */}
+                  <li><Link to="/"><i class="material-icons" style={{paddingTop: "3.6px"}}>list</i></Link></li>
                   <li><a href="/api/download" download><i class="material-icons" style={{paddingTop: "3.6px"}}>get_app</i></a></li>
                   <li>
                     <a  href="https://github.wdf.sap.corp/ML-Leonardo/ML-SFSF-LearningRecommendations/tree/master/research/topics/lr_topics_tool" 
@@ -483,7 +485,7 @@ class AppItem extends Component {
             </nav>
             <div className="valign-wrapper content-wrapper">
               <div style={{width:"100%"}}>
-                <div className="row valign-wrapper" style={{width:"100%",marginTop:"1rem",paddingBottom:".5rem", marginBottom:".3rem"}}>
+                <div className="row valign-wrapper" style={{width:"100%",margin:"0",paddingBottom:".5rem", height:"480.5px"}}>
                   <div className="col m2 hide-on-small-only"  style={{color:"white"}}>
                       <button id="arrowDown" 
                           onClick={this.indexDown}
@@ -567,20 +569,20 @@ class AppItem extends Component {
                   </div>
                   <div className="col s2 hide-on-small"></div>
                 </div>
+                <FilePond ref={ref => this.pond = ref}
+                  labelIdle='Drag & Drop or <span class="filepond--label-action"> Browse </span>'
+                  files={this.state.files}
+                  name={"file"}
+                  server="/api/upload"
+                  onupdatefiles={(fileItems) => {
+                    this.setState({
+                      files: fileItems.map(fileItem => fileItem.file)
+                    });
+                  }}>
+                </FilePond>
               </div>
             </div>
-          </div>    
-          <FilePond ref={ref => this.pond = ref}
-            labelIdle='Drag & Drop or <span class="filepond--label-action"> Browse </span>'
-            files={this.state.files}
-            name={"file"}
-            server="/api/upload"
-            onupdatefiles={(fileItems) => {
-              this.setState({
-                files: fileItems.map(fileItem => fileItem.file)
-              });
-            }}>
-          </FilePond>
+          </div>
         </div>
         </>
       );

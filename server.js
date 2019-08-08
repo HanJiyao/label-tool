@@ -42,7 +42,7 @@ var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
 // setup the logger
 app.use(logger('combined', { stream: accessLogStream }))
 
-mongoose.connect('mongodb://lssinh033.sin.sap.corp:27017/lrdb', { useNewUrlParser: true, user:'lr', pass:'123123' });
+mongoose.connect('mongodb://lr:123abc@ds259377.mlab.com:59377/learning-recommender',{useNewUrlParser: true});
 const connection = mongoose.connection;
 connection.once('open', function() {
     console.log("MongoDB database connection established successfully");
@@ -50,22 +50,13 @@ connection.once('open', function() {
 
 app.use(express.static(path.join(__dirname, 'build')));
 
-app.get('*', function(req, res) {
+app.get('/item', function(req, res) {
     res.sendFile('index.html', {root: path.join(__dirname, './build/')});
 });
 
 app.post('/api/initData', function(req, res) {
     let tenant = 
-        [ 'CoastCapital',
-        'SAPLearningHub',
-        'Nedbank',
-        'Mondelez',
-        'Disney',
-        'Ahold',
-        'Specsavers',
-        'Hersheys',
-        'Barclays',
-        'Energizer' ]
+        ['The Daily', 'Morning News', 'Community Voice']
     let tenants = []
     tenant.map(item=>tenants.push({id:item,label:item}))
     let selectedType, selectedTypeUI =  ['1 Algorithm','2 Subject Area','3 Undetermined','Undefined']
@@ -523,7 +514,7 @@ app.get('/api/download', (req, res) => {
     });
 })
 
-const port = process.env.PORT || 2233;
+const port = process.env.PORT || 2333;
 const host = process.env.HOST || '0.0.0.0'
 
 app.listen(port);

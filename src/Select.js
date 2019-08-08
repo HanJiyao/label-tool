@@ -22,7 +22,7 @@ class MSelect extends Component {
     let selectedFiles = [];
     let selected = document.querySelectorAll('.selected');
     for (var i=0;i<selected.length;i++){
-      selectedFiles.push('all_items_'+selected[i].innerText+'.csv')
+      selectedFiles.push(selected[i].innerText+'.csv')
     }
     this.props.changeFiles(selectedFiles)
   }
