@@ -53,7 +53,7 @@
     "typescript": "^3.6.4",
     "webpack-dev-middleware": "^3.7.2",
     "webpack-hot-middleware": "^2.25.0",
-    "xlsx": "^0.14.5",
+    "xlsx": "^0.17.0",
     "xmlhttprequest": "^1.8.0",
     "xregexp": "^4.2.4"
   },
